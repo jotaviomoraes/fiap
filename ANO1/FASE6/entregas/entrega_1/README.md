@@ -25,6 +25,22 @@ O projeto contempla desde a preparação e anotação do dataset até o treiname
 
 ---
 
+## 🎥 Vídeo de apresentação
+
+O vídeo apresenta a proposta do projeto, preparação dos dados, metodologia utilizada, experimentos realizados, principais resultados e conclusões.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=j6Jf3tsRY2E" target="_blank">
+    <img src="https://img.youtube.com/vi/j6Jf3tsRY2E/maxresdefault.jpg" alt="Vídeo de apresentação do projeto" width="800">
+  </a>
+</p>
+
+<p align="center">
+  ▶️ <a href="https://www.youtube.com/watch?v=j6Jf3tsRY2E">Assistir no YouTube</a>
+</p>
+
+---
+
 ## 📂 Dataset
 
 Foi construído um dataset próprio contendo **80 imagens**, distribuídas igualmente entre as classes gato e tênis.
@@ -409,15 +425,6 @@ Para reproduzir o pipeline:
 > **Importante:** o diretório `/content` do Google Colab possui armazenamento temporário. Caso a sessão seja encerrada ou reiniciada, poderá ser necessário realizar novamente o upload do `dataset.zip` e sua descompactação.
 
 > **Observação:** o tempo de treinamento pode variar de acordo com a GPU disponibilizada pelo Google Colab.
-
----
-
-## 🎥 Vídeo de apresentação
-
-O vídeo apresenta a proposta do projeto, preparação dos dados, metodologia utilizada, experimentos realizados, principais resultados e conclusões.
-
-**Link do vídeo no YouTube:**  
-[Adicionar link do vídeo aqui]
 
 ---
 
