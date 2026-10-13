@@ -66,13 +66,13 @@ As classes foram definidas como:
 A estrutura do dataset foi organizada em diretórios separados para treinamento, validação e teste:
 
 <p align="center">
-  <img src="imagens/estrutura_dataset.jpg" width="800">
+  <img src="prints/estrutura_dataset.jpg" width="800">
 </p>
 
 Antes do treinamento, foi realizada uma conferência da quantidade de imagens e arquivos de anotação presentes em cada conjunto:
 
 <p align="center">
-  <img src="imagens/validacao_dataset.jpg" width="800">
+  <img src="prints/validacao_dataset.jpg" width="800">
 </p>
 
 A estrutura utilizada durante os experimentos foi:
@@ -206,7 +206,7 @@ O treinamento foi configurado com:
 O mecanismo de Early Stopping interrompeu automaticamente o treinamento após **50 épocas**, sendo o melhor resultado registrado na **época 39**.
 
 <p align="center">
-  <img src="imagens/resultado_early_stopping.jpg" width="900">
+  <img src="prints/resultado_early_stopping.jpg" width="900">
 </p>
 
 O resultado demonstra a atuação do Early Stopping, interrompendo o processo quando não são observadas novas melhorias durante o período de paciência estabelecido.
@@ -239,7 +239,7 @@ Por outro lado, o experimento utilizando **Early Stopping** apresentou o maior R
 Os resultados demonstram que o aumento do número de épocas não produz necessariamente melhoria simultânea em todas as métricas, tornando importante analisar diferentes indicadores durante a avaliação de um modelo de detecção de objetos.
 
 <p align="center">
-  <img src="imagens/comparacao_experimentos.jpg" width="850">
+  <img src="prints/comparacao_experimentos.jpg" width="850">
 </p>
 
 As curvas de aprendizado e as análises detalhadas de cada treinamento estão disponíveis no notebook do projeto.
@@ -261,13 +261,13 @@ Nas imagens contendo objetos mais isolados, o modelo apresentou bounding boxes m
 #### Classe gato
 
 <p align="center">
-  <img src="imagens/teste_gato.jpg" width="350">
+  <img src="prints/teste_gato.jpg" width="350">
 </p>
 
 #### Classe tênis
 
 <p align="center">
-  <img src="imagens/teste_tenis.jpg" width="350">
+  <img src="prints/teste_tenis.jpg" width="350">
 </p>
 
 Os exemplos demonstram que o modelo desenvolveu capacidade de reconhecer as duas classes estudadas em imagens que não participaram diretamente do processo de treinamento.
@@ -281,13 +281,13 @@ Também foram analisadas imagens contendo múltiplas instâncias da mesma classe
 ### Múltiplos gatos
 
 <p align="center">
-  <img src="imagens/teste_gatos_multiplos.jpg" width="500">
+  <img src="prints/teste_gatos_multiplos.jpg" width="500">
 </p>
 
 ### Múltiplos tênis
 
 <p align="center">
-  <img src="imagens/teste_tenis_multiplos.jpg" width="400">
+  <img src="prints/teste_tenis_multiplos.jpg" width="400">
 </p>
 
 Nessas situações, foram observadas limitações na individualização dos objetos. Algumas bounding boxes apresentaram sobreposição ou abrangeram mais de uma instância.
@@ -371,7 +371,7 @@ projeto-fase6/
 │
 ├── RenataDeAlmeidaMarinho_..._pbl_fase06.ipynb
 │
-└── imagens/
+└── prints/
     ├── estrutura_dataset.jpg
     ├── validacao_dataset.jpg
     ├── resultado_early_stopping.jpg
