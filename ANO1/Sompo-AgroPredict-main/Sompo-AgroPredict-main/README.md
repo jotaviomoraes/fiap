@@ -233,6 +233,14 @@ streamlit run src/dashboard/app.py
 # Acessar: http://localhost:8501
 ```
 
+O dashboard popula automaticamente um banco sem leituras com 14 dias de dados fictícios,
+reutilizando o simulador, sem apagar dados existentes. Isso também funciona no Streamlit
+Community Cloud: basta enviar o código para o GitHub, sem versionar o SQLite.
+A primeira execução pode demorar enquanto as predições são calculadas.
+Para desativar essa inicialização, defina `APP_DEMO="false"` nas variáveis de ambiente
+ou nos Secrets do Streamlit Cloud. O SQLite do Cloud não é armazenamento permanente;
+se ele for recriado vazio, a demonstração será gerada novamente.
+
 > Para **GPS e clima em tempo real**, abra o link no **celular do operador** — o navegador mobile pede
 > permissão de localização. Sem GPS, a tela mostra uma prévia com os sliders e a leitura só é gravada
 > pelo botão **💾 Registrar leitura**.

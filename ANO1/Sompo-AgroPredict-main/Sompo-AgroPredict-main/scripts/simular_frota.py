@@ -97,18 +97,24 @@ def main() -> None:
                         help="fracao de leituras com falha de sensor (a metade disso vira retransmissao)")
     args = parser.parse_args()
 
-    ctx = criar_contexto(com_oracle=False)
-    rng = np.random.default_rng(args.seed)
-    rng_falhas = np.random.default_rng(args.seed + 1)  # separado: nao altera a simulacao principal
+    simular_frota(criar_contexto(com_oracle=False), args.dias, args.leituras_por_dia,
+                  args.seed, args.limpar, args.taxa_falhas)
 
-    if args.limpar:
+
+def simular_frota(ctx, dias: int = 14, leituras_por_dia: int = 8,
+                  seed: int = 42, limpar: bool = False, taxa_falhas: float = 0.02) -> int:
+    """Gera dados ficticios no contexto informado, sem apagar dados por padrao."""
+    rng = np.random.default_rng(seed)
+    rng_falhas = np.random.default_rng(seed + 1)  # separado: nao altera a simulacao principal
+
+    if limpar:
         print(f"[INFO] {ctx.repo.remover_por_origem(ORIGEM)} leituras simuladas anteriores removidas")
 
     equipamentos = ctx.repo.listar_equipamentos().to_dict("records")
     hoje = date.today()
     total, rejeitadas, erros, respondidos = 0, 0, 0, 0
 
-    for delta in range(args.dias - 1, -1, -1):
+    for delta in range(dias - 1, -1, -1):
         dia = hoje - timedelta(days=delta)
         chuva_regiao = {
             regiao: (rng.gamma(2.0, 12.0) if rng.random() < perfil[0] else rng.uniform(0, 3))
@@ -116,16 +122,16 @@ def main() -> None:
         }
         for equip in equipamentos:
             operador, _, prob_respeitar = OPERADORES[equip["codigo"]]
-            minutos = np.sort(rng.integers(6 * 60, 19 * 60, size=args.leituras_por_dia))
+            minutos = np.sort(rng.integers(6 * 60, 19 * 60, size=leituras_por_dia))
             for minuto in minutos:
                 momento = datetime.combine(dia, datetime.min.time()) + timedelta(minutes=int(minuto))
                 if momento > datetime.now():
                     continue
                 dados = gerar_leitura(rng, equip, momento, chuva_regiao[equip["regiao"]])
                 sorteio = rng_falhas.random()
-                if sorteio < args.taxa_falhas:
+                if sorteio < taxa_falhas:
                     dados = simular_falha(rng_falhas, dados)
-                envios = 2 if args.taxa_falhas <= sorteio < 1.5 * args.taxa_falhas else 1
+                envios = 2 if taxa_falhas <= sorteio < 1.5 * taxa_falhas else 1
                 resultado = None
                 for _ in range(envios):
                     try:
@@ -160,6 +166,16 @@ def main() -> None:
     if erros:
         print(f"[AVISO] {erros} erros de processamento")
     print(f"[OK] Banco: {ctx.repo.caminho}")
+    if erros:
+        raise RuntimeError(f"A simulacao teve {erros} erros de processamento.")
+    return total
+
+
+def popular_demonstracao(ctx) -> int:
+    """Popula apenas bancos sem leituras; nunca substitui dados existentes."""
+    if not ctx.repo.consultar("SELECT 1 FROM leituras LIMIT 1").empty:
+        return 0
+    return simular_frota(ctx)
 
 
 if __name__ == "__main__":

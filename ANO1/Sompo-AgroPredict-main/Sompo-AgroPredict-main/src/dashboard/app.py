@@ -18,10 +18,12 @@ from pathlib import Path
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agropredict.modelo import ModeloIndisponivel  # noqa: E402
 from agropredict.seguranca import PERFIS, SenhaFraca  # noqa: E402
 from ui_comum import contexto  # noqa: E402
+from scripts.simular_frota import popular_demonstracao  # noqa: E402
 
 from paginas import alertas, auditoria, frota, manutencao, operacao  # noqa: E402
 
@@ -52,10 +54,17 @@ def _usuario_bootstrap() -> str | None:
     return usuario
 
 
+@st.cache_resource(show_spinner="Preparando a frota fictícia para demonstração…")
+def _dados_bootstrap() -> None:
+    popular_demonstracao(contexto())
+
+
 def carregar_contexto():
     try:
         ctx = contexto()
         _usuario_bootstrap()
+        if os.getenv("APP_DEMO", "true").lower() in {"true", "1", "sim"}:
+            _dados_bootstrap()
         return ctx
     except ModeloIndisponivel as exc:
         st.error(f"❌ {exc}")
@@ -63,6 +72,8 @@ def carregar_contexto():
         st.error(f"❌ APP_PASSWORD inválida: {exc}")
     except ValueError as exc:
         st.error(f"❌ Configuração inválida: {exc}")
+    except RuntimeError as exc:
+        st.error(f"❌ Não foi possível preparar a demonstração: {exc}")
     st.stop()
 
 
@@ -104,6 +115,8 @@ def main() -> None:
         return
 
     with st.sidebar:
+        if os.getenv("APP_DEMO", "true").lower() in {"true", "1", "sim"}:
+            st.caption("🧪 Demonstração com dados fictícios. Não usar para decisões reais.")
         st.markdown(f"**👤 {sessao.nome or sessao.usuario}**  \n{PERFIS[sessao.perfil]}")
         if st.button("Sair", key="logout"):
             ctx.auth.registrar_logout(sessao)
