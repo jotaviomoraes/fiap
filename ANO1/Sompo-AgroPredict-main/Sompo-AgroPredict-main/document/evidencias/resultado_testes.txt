@@ -1,0 +1,118 @@
+# 2. Testes automatizados
+# Comando: python.exe -m unittest discover -s tests -t tests -v
+# Executado em 28/09/2026 19:43
+
+[OK] 2 predicoes inseridas
+[OK] 1 alertas registrados (risco MEDIO/ALTO)
+[AVISO] Linha ignorada: Leitura invalida: velocidade=-5.0 fora da faixa [0.0, 80.0]
+[OK] 1 predicoes inseridas
+[OK] 0 alertas registrados (risco MEDIO/ALTO)
+[AVISO] 1 linhas rejeitadas na validacao
+[OK] 40 predicoes inseridas
+[OK] 22 alertas registrados (risco MEDIO/ALTO)
+test_alertas_oracle_seguem_o_mesmo_criterio (test_consistencia_oracle.ConsistenciaOracleTests.test_alertas_oracle_seguem_o_mesmo_criterio) ... C:\Users\casa\anaconda3\Lib\site-packages\joblib\numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+  array.shape = self.shape
+ok
+test_linha_invalida_e_ignorada_no_lote (test_consistencia_oracle.ConsistenciaOracleTests.test_linha_invalida_e_ignorada_no_lote) ... ok
+test_mesmo_score_no_sqlite_e_no_oracle (test_consistencia_oracle.ConsistenciaOracleTests.test_mesmo_score_no_sqlite_e_no_oracle) ... ok
+test_aceita_numeros_em_texto (test_entrada.ValidacaoEntradaTests.test_aceita_numeros_em_texto) ... ok
+test_campo_ausente (test_entrada.ValidacaoEntradaTests.test_campo_ausente) ... ok
+test_fora_da_faixa_fisica (test_entrada.ValidacaoEntradaTests.test_fora_da_faixa_fisica) ... ok
+test_leitura_valida (test_entrada.ValidacaoEntradaTests.test_leitura_valida) ... ok
+test_reporta_todos_os_problemas_de_uma_vez (test_entrada.ValidacaoEntradaTests.test_reporta_todos_os_problemas_de_uma_vez) ... ok
+test_status_invalido (test_entrada.ValidacaoEntradaTests.test_status_invalido) ... ok
+test_valor_nao_numerico_e_nan (test_entrada.ValidacaoEntradaTests.test_valor_nao_numerico_e_nan) ... ok
+test_falhas_viram_ok_false_sem_excecao (test_fontes.OpenMeteoTests.test_falhas_viram_ok_false_sem_excecao) ... ok
+test_horas_sem_chuva_informada_nao_quebram_a_soma (test_fontes.OpenMeteoTests.test_horas_sem_chuva_informada_nao_quebram_a_soma) ... ok
+test_resposta_valida (test_fontes.OpenMeteoTests.test_resposta_valida) ... ok
+test_sem_umidade_do_solo (test_fontes.OpenMeteoTests.test_sem_umidade_do_solo) ... ok
+test_deriva_parado_vira_zero (test_fontes.VelocidadeGpsTests.test_deriva_parado_vira_zero) ... ok
+test_haversine (test_fontes.VelocidadeGpsTests.test_haversine) ... ok
+test_leituras_incoerentes_sao_descartadas (test_fontes.VelocidadeGpsTests.test_leituras_incoerentes_sao_descartadas) ... ok
+test_velocidade_calculada_entre_dois_pontos (test_fontes.VelocidadeGpsTests.test_velocidade_calculada_entre_dois_pontos) ... ok
+test_velocidade_do_chip (test_fontes.VelocidadeGpsTests.test_velocidade_do_chip) ... ok
+test_banco_da_sprint_3_e_atualizado_sem_perder_dados (test_modelo.MigracaoTests.test_banco_da_sprint_3_e_atualizado_sem_perder_dados) ... ok
+test_arquivo_corrompido (test_modelo.ModeloFinalTests.test_arquivo_corrompido) ... ok
+test_explicacao_aponta_as_variaveis_de_risco (test_modelo.ModeloFinalTests.test_explicacao_aponta_as_variaveis_de_risco) ... ok
+test_leitura_segura_nao_tem_contribuicoes_relevantes (test_modelo.ModeloFinalTests.test_leitura_segura_nao_tem_contribuicoes_relevantes) ... ok
+test_modelo_legado_sem_metadados_continua_funcionando (test_modelo.ModeloFinalTests.test_modelo_legado_sem_metadados_continua_funcionando) ... C:\Users\casa\anaconda3\Lib\site-packages\joblib\numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
+As an alternative, you can create a new view using np.reshape (with copy=False if needed).
+  array.shape = self.shape
+ok
+test_probabilidades_somam_um_e_classe_e_a_mais_provavel (test_modelo.ModeloFinalTests.test_probabilidades_somam_um_e_classe_e_a_mais_provavel) ... ok
+test_versao_e_metadados_vem_do_treino (test_modelo.ModeloFinalTests.test_versao_e_metadados_vem_do_treino) ... ok
+test_colunas_obrigatorias (test_qualidade.LimpezaTests.test_colunas_obrigatorias) ... ok
+test_dataset_versionado_fica_apto (test_qualidade.LimpezaTests.test_dataset_versionado_fica_apto) ... ok
+test_trata_cada_tipo_de_problema (test_qualidade.LimpezaTests.test_trata_cada_tipo_de_problema) ... ok
+test_numero (test_qualidade.NormalizacaoTests.test_numero) ... ok
+test_status_e_classe (test_qualidade.NormalizacaoTests.test_status_e_classe) ... ok
+test_alto_com_alta_probabilidade_tem_score_alto (test_regras.CalcularScoreRiscoTests.test_alto_com_alta_probabilidade_tem_score_alto) ... ok
+test_baixo_com_alta_confianca_tem_score_baixo (test_regras.CalcularScoreRiscoTests.test_baixo_com_alta_confianca_tem_score_baixo) ... ok
+test_classe_desconhecida_e_rejeitada (test_regras.CalcularScoreRiscoTests.test_classe_desconhecida_e_rejeitada) ... ok
+test_entrada_vazia_e_rejeitada (test_regras.CalcularScoreRiscoTests.test_entrada_vazia_e_rejeitada) ... ok
+test_override_critico_forca_score_maximo (test_regras.CalcularScoreRiscoTests.test_override_critico_forca_score_maximo) ... ok
+test_score_nao_e_a_maior_probabilidade (test_regras.CalcularScoreRiscoTests.test_score_nao_e_a_maior_probabilidade) ... ok
+test_baixo_segue_rota (test_regras.RegrasDominioTests.test_baixo_segue_rota) ... ok
+test_categoria_mecanica (test_regras.RegrasDominioTests.test_categoria_mecanica) ... ok
+test_categoria_prioriza_variavel_no_maximo (test_regras.RegrasDominioTests.test_categoria_prioriza_variavel_no_maximo) ... ok
+test_recomendacao_de_atolamento (test_regras.RegrasDominioTests.test_recomendacao_de_atolamento) ... ok
+test_verificar_max_lista_variaveis_criticas (test_regras.RegrasDominioTests.test_verificar_max_lista_variaveis_criticas) ... ok
+test_alertas_do_operador_e_aderencia (test_relatorios.RelatoriosTests.test_alertas_do_operador_e_aderencia) ... ok
+test_comportamento_preventivo_do_produtor (test_relatorios.RelatoriosTests.test_comportamento_preventivo_do_produtor) ... ok
+test_filtros_de_regiao_periodo_e_operacao (test_relatorios.RelatoriosTests.test_filtros_de_regiao_periodo_e_operacao) ... ok
+test_forense_e_auditoria (test_relatorios.RelatoriosTests.test_forense_e_auditoria) ... ok
+test_indicadores_de_qualidade_da_coleta (test_relatorios.RelatoriosTests.test_indicadores_de_qualidade_da_coleta) ... leitura rejeitada origem=dashboard usuario=op.carlos motivo=Leitura invalida: velocidade ausente
+ok
+test_prioridade_de_manutencao (test_relatorios.RelatoriosTests.test_prioridade_de_manutencao) ... ok
+test_resumo_e_ranking (test_relatorios.RelatoriosTests.test_resumo_e_ranking) ... ok
+test_tendencia_por_regiao_e_por_tipo_de_operacao (test_relatorios.RelatoriosTests.test_tendencia_por_regiao_e_por_tipo_de_operacao) ... ok
+test_bloqueio_apos_falhas_consecutivas (test_seguranca.AutenticacaoTests.test_bloqueio_apos_falhas_consecutivas) ... ok
+test_login_registra_perfil_no_log (test_seguranca.AutenticacaoTests.test_login_registra_perfil_no_log) ... ok
+test_perfil_invalido (test_seguranca.AutenticacaoTests.test_perfil_invalido) ... ok
+test_senha_nao_fica_no_banco (test_seguranca.AutenticacaoTests.test_senha_nao_fica_no_banco) ... ok
+test_usuario_desativado_nao_entra (test_seguranca.AutenticacaoTests.test_usuario_desativado_nao_entra) ... ok
+test_admin_acessa_tudo (test_seguranca.PerfisTests.test_admin_acessa_tudo) ... ok
+test_matriz_de_permissoes (test_seguranca.PerfisTests.test_matriz_de_permissoes) ... ok
+test_todo_perfil_ve_alertas (test_seguranca.PerfisTests.test_todo_perfil_ve_alertas) ... ok
+test_hash_malformado_nao_autentica (test_seguranca.SenhaTests.test_hash_malformado_nao_autentica) ... ok
+test_hash_verifica_e_nao_contem_a_senha (test_seguranca.SenhaTests.test_hash_verifica_e_nao_contem_a_senha) ... ok
+test_salt_diferente_a_cada_hash (test_seguranca.SenhaTests.test_salt_diferente_a_cada_hash) ... ok
+test_senha_curta_e_rejeitada (test_seguranca.SenhaTests.test_senha_curta_e_rejeitada) ... ok
+test_alteracao_indevida_no_banco_e_detectada (test_servico.FluxoPontaAPontaTests.test_alteracao_indevida_no_banco_e_detectada) ... Falha ao processar leitura=1
+Traceback (most recent call last):
+  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\servico.py", line 115, in processar_leitura
+    raise ErroProcessamento("integridade violada: a leitura foi alterada depois de gravada")
+agropredict.servico.ErroProcessamento: integridade violada: a leitura foi alterada depois de gravada
+ok
+test_banco_rejeita_classe_fora_do_dominio (test_servico.FluxoPontaAPontaTests.test_banco_rejeita_classe_fora_do_dominio) ... ok
+test_entrada_invalida_fica_registrada_como_rejeicao (test_servico.FluxoPontaAPontaTests.test_entrada_invalida_fica_registrada_como_rejeicao) ... leitura rejeitada origem=teste usuario=op.teste motivo=Leitura invalida: velocidade=250.0 fora da faixa [0.0, 80.0]
+ok
+test_entrada_invalida_nao_chega_ao_banco (test_servico.FluxoPontaAPontaTests.test_entrada_invalida_nao_chega_ao_banco) ... leitura rejeitada origem=dashboard usuario=op.teste motivo=Leitura invalida: velocidade ausente
+ok
+test_equipamento_inexistente_e_rejeitado (test_servico.FluxoPontaAPontaTests.test_equipamento_inexistente_e_rejeitado) ... leitura rejeitada origem=dashboard usuario=op.teste motivo=Leitura invalida: equipamento 999 nao cadastrado
+ok
+test_leitura_corrompida_no_banco_fica_marcada_com_erro (test_servico.FluxoPontaAPontaTests.test_leitura_corrompida_no_banco_fica_marcada_com_erro) ... Falha ao processar leitura=1
+Traceback (most recent call last):
+  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\servico.py", line 111, in processar_leitura
+    leitura = Leitura.de_dict({campo: registro[campo] for campo in FEATURES})
+  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\entrada.py", line 91, in de_dict
+    raise LeituraInvalida(problemas)
+agropredict.entrada.LeituraInvalida: Leitura invalida: velocidade=999.0 fora da faixa [0.0, 80.0]
+ok
+test_leitura_e_gravada_antes_do_modelo (test_servico.FluxoPontaAPontaTests.test_leitura_e_gravada_antes_do_modelo) ... ok
+test_leitura_nao_e_processada_duas_vezes (test_servico.FluxoPontaAPontaTests.test_leitura_nao_e_processada_duas_vezes) ... ok
+test_modelo_usa_os_valores_do_banco (test_servico.FluxoPontaAPontaTests.test_modelo_usa_os_valores_do_banco) ... ok
+test_pendentes_sao_reprocessados (test_servico.FluxoPontaAPontaTests.test_pendentes_sao_reprocessados) ... ok
+test_predicao_guarda_explicacao (test_servico.FluxoPontaAPontaTests.test_predicao_guarda_explicacao) ... ok
+test_predicao_guarda_probabilidades_versao_e_override (test_servico.FluxoPontaAPontaTests.test_predicao_guarda_probabilidades_versao_e_override) ... ok
+test_retransmissao_identica_e_rejeitada_e_registrada (test_servico.FluxoPontaAPontaTests.test_retransmissao_identica_e_rejeitada_e_registrada) ... leitura duplicada origem=dashboard usuario=op.teste existente=1
+ok
+test_risco_alto_gera_alerta_pendente (test_servico.FluxoPontaAPontaTests.test_risco_alto_gera_alerta_pendente) ... ok
+test_risco_baixo_nao_gera_alerta (test_servico.FluxoPontaAPontaTests.test_risco_baixo_nao_gera_alerta) ... ok
+test_score_gravado_e_o_risco_esperado (test_servico.FluxoPontaAPontaTests.test_score_gravado_e_o_risco_esperado) ... ok
+
+----------------------------------------------------------------------
+Ran 78 tests in 26.956s
+
+OK

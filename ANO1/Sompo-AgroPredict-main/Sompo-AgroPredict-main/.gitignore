@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------
+# Template FIAP — planilhas e dados tabulares nao versionados
+# ---------------------------------------------------------------
+*.csv
+*.tsv
+*.xls
+*.xlsx
+
+# Excecao: os datasets de treino fazem parte da entrega e DEVEM ser versionados
+!src/data/dataset_v2.csv
+!src/data/dataset_v3_bruto.csv
+
+# ---------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------
+# Ambiente e segredos (NUNCA versionar credenciais do Oracle)
+# ---------------------------------------------------------------
+.venv/
+venv/
+.env
+config/.env
+
+# ---------------------------------------------------------------
+# Dados gerados em runtime
+# ---------------------------------------------------------------
+src/dashboard/data/
+# Barra inicial: so a pasta data/ da raiz (banco SQLite e log), nao src/data/
+/data/
+
+# ---------------------------------------------------------------
+# IDE / SO / logs
+# ---------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
