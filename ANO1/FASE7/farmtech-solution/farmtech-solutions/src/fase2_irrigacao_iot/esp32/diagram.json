@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "author": "Giselli Takahashi",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": -68.34,
+      "left": 332.9,
+      "rotate": 270,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -62.4,
+      "left": 135.9,
+      "rotate": 270,
+      "attrs": { "humidity": "53.5", "temperature": "31.5" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": 89.4,
+      "left": 430,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay1",
+      "top": 102.2,
+      "left": 146.8,
+      "rotate": 90,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": -106.2,
+      "left": 339,
+      "rotate": 90,
+      "attrs": { "color": "green", "xray": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn3",
+      "top": -96.6,
+      "left": 406.2,
+      "rotate": 90,
+      "attrs": { "color": "green", "xray": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": -115.8,
+      "left": 281.4,
+      "rotate": 90,
+      "attrs": { "color": "green", "xray": "1" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "h0" ] ],
+    [ "ldr1:VCC", "esp:3V3", "red", [ "h0" ] ],
+    [ "relay1:VCC", "esp:3V3", "red", [ "h0" ] ],
+    [ "dht1:GND", "esp:GND.2", "yellow", [ "h0" ] ],
+    [ "ldr1:GND", "esp:GND.1", "yellow", [ "h0" ] ],
+    [ "relay1:GND", "esp:GND.2", "yellow", [ "v-96", "h106" ] ],
+    [ "ldr1:AO", "esp:15", "green", [ "h0" ] ],
+    [ "esp:GND.2", "btn2:2.r", "yellow", [ "v0" ] ],
+    [ "esp:GND.3", "btn1:2.r", "yellow", [ "v0" ] ],
+    [ "btn1:1.l", "esp:25", "green", [ "v0" ] ],
+    [ "btn2:1.l", "esp:22", "green", [ "v0" ] ],
+    [ "esp:GND.1", "btn3:1.r", "yellow", [ "v0" ] ],
+    [ "esp:16", "btn3:2.l", "green", [ "v0" ] ],
+    [ "dht1:SDA", "esp:32", "green", [ "h0" ] ],
+    [ "relay1:IN", "esp:14", "green", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

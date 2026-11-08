@@ -1,0 +1,8 @@
+# Normaliza finais de linha (LF no repositório)
+* text=auto
+*.png binary
+*.jpg binary
+*.ipynb text eol=lf
+
+# Pesos YOLO versionados como binário
+*.pt binary

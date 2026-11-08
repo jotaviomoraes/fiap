@@ -1,0 +1,38 @@
+# Notas internas de trabalho (fora do repositório)
+_interno/
+
+# Credenciais
+.env
+*.pem
+credentials*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Saídas geradas em execução (Fase 2 - colheita)
+src/fase2_colheita_cana/dados.json
+src/fase2_colheita_cana/relatorio.txt
+
+# Visão computacional: pesos e datasets grandes
+*.pt
+!src/fase6_visao_computacional/modelos/best.pt
+*.onnx
+runs/
+dataset/
+*.zip
+src/fase6_visao_computacional/resultados/
+
+# Sistema / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

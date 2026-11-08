@@ -1,0 +1,27 @@
+# FarmTech Solutions — Fase 7 (sistema integrado)
+# Instale com:  pip install -r requirements.txt
+
+# Dashboard e Machine Learning (Fase 4)
+streamlit>=1.30
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+plotly>=5.18
+matplotlib>=3.7
+
+# Notebooks (Fases 3 e 5)
+seaborn>=0.13
+jupyter
+
+# Serviços (Fases 2 e 3)
+requests>=2.31        # API OpenWeather
+oracledb>=2.0         # banco Oracle
+python-dotenv>=1.0    # leitura do .env
+
+# AWS - Monitoramento e alertas (Fase 7)
+boto3>=1.34           # integração com Amazon SNS
+
+# Visão computacional (Fase 6)
+ultralytics>=8.3,<9   # YOLO; instala o PyTorch junto
+
+# Fase 1 (R): pacotes httr e jsonlite, instalados pelo próprio script
