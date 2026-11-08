@@ -1,13 +1,15 @@
 """
 simular_frota.py
 ----------------
-Popula o SQLite com uma frota simulada passando pelo MESMO fluxo do
-dashboard: cada leitura e validada, gravada em `leituras`, lida do banco,
-avaliada pelo modelo + regras e gravada em `predicoes`/`alertas`.
+Popula o banco ativo (Oracle principal ou SQLite de fallback) com uma
+frota simulada passando pelo MESMO fluxo do dashboard: cada leitura e
+validada, gravada em `leituras`, lida do banco, avaliada pelo modelo +
+regras e gravada em `predicoes`/`alertas`.
 
-Cada regiao tem um perfil climatico e cada operador um estilo de
-conducao, para que os relatorios de tendencia e aderencia tenham
-diferencas visiveis. Os dados sao ficticios.
+A frota ficticia tem 8 equipamentos (5 colheitadeiras, 2 tratores e 1
+pulverizador), 4 operadores, 4 fazendas e 3 regioes. Cada regiao tem um
+perfil climatico e cada operador um estilo de conducao, para que os
+relatorios de tendencia e aderencia tenham diferencas visiveis.
 
 Para exercitar a rastreabilidade da coleta, uma pequena fracao das
 leituras simula falhas reais: sensor sem valor ou com valor impossivel
@@ -15,10 +17,11 @@ leituras simula falhas reais: sensor sem valor ou com valor impossivel
 duplicata). Tudo fica registrado na tabela `rejeicoes`.
 
 Uso, a partir da raiz do repositorio:
-    python scripts/simular_frota.py                  # 14 dias, 8 leituras/dia/equipamento
+    python scripts/simular_frota.py                  # 42 dias, 24 leituras/dia/equipamento (~8.000 leituras)
     python scripts/simular_frota.py --dias 30 --leituras-por-dia 10
     python scripts/simular_frota.py --limpar         # remove a simulacao anterior antes
     python scripts/simular_frota.py --taxa-falhas 0  # sem falhas de coleta
+    python scripts/simular_frota.py --backend sqlite # forca o banco local
 """
 
 from __future__ import annotations
@@ -34,9 +37,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from agropredict.entrada import FAIXAS_VALIDAS, LeituraInvalida  # noqa: E402
 from agropredict.fabrica import criar_contexto  # noqa: E402
+from agropredict.persistencia import VERSAO_DEMO  # noqa: E402
 from agropredict.servico import LeituraDuplicada  # noqa: E402
 
 ORIGEM = "simulador"
+CHAVE_VERSAO_DEMO = "demo_version"
 
 # regiao -> (prob. de chuva no dia, temperatura base °C, declividade base %)
 PERFIL_REGIAO = {
@@ -46,6 +51,7 @@ PERFIL_REGIAO = {
 }
 
 # codigo do equipamento -> (operador, excesso de velocidade km/h, prob. de respeitar alerta)
+# 8 equipamentos operados por 4 operadores (cada um em 2 maquinas).
 OPERADORES = {
     "COL-01": ("op.carlos", 0.0, 0.90),
     "COL-02": ("op.maria", 1.0, 0.80),
@@ -53,6 +59,8 @@ OPERADORES = {
     "PUL-01": ("op.ana", 0.5, 0.85),
     "TRA-02": ("op.pedro", 3.0, 0.55),
     "COL-03": ("op.lucia", 0.0, 0.95),
+    "COL-04": ("op.rafael", 1.5, 0.75),
+    "COL-05": ("op.beatriz", 0.0, 0.88),
 }
 
 VELOCIDADE_POR_STATUS = {"Colheita": 7.0, "Deslocamento": 13.0, "Manobra": 5.0}
@@ -71,7 +79,8 @@ def _limitar(campo: str, valor: float) -> float:
 
 def gerar_leitura(rng, equipamento: dict, momento: datetime, chuva_dia: float) -> dict:
     prob_chuva, temp_base, decl_base = PERFIL_REGIAO[equipamento["regiao"]]
-    _, excesso_vel, _ = OPERADORES[equipamento["codigo"]]
+    operador = OPERADORES.get(equipamento["codigo"])
+    excesso_vel = operador[1] if operador else 0.0
     status = rng.choice(list(VELOCIDADE_POR_STATUS), p=[0.55, 0.25, 0.20])
     hora = momento.hour + momento.minute / 60
     return {
@@ -88,17 +97,24 @@ def gerar_leitura(rng, equipamento: dict, momento: datetime, chuva_dia: float) -
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Simulador de frota do Sompo AgroPredict")
-    parser.add_argument("--dias", type=int, default=14)
-    parser.add_argument("--leituras-por-dia", type=int, default=8)
+    parser = argparse.ArgumentParser(description="Simulador de frota do AgroPredict")
+    parser.add_argument("--dias", type=int, default=42)
+    parser.add_argument("--leituras-por-dia", type=int, default=24)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--limpar", action="store_true", help="remove a simulacao anterior")
     parser.add_argument("--taxa-falhas", type=float, default=0.02,
                         help="fracao de leituras com falha de sensor (a metade disso vira retransmissao)")
+    parser.add_argument("--backend", choices=["auto", "oracle", "sqlite"], default=None,
+                        help="banco a usar (padrao: DB_BACKEND do config/.env)")
     args = parser.parse_args()
 
-    simular_frota(criar_contexto(com_oracle=False), args.dias, args.leituras_por_dia,
+    ctx = criar_contexto(com_oracle=False, backend=args.backend)
+    if ctx.aviso:
+        print(f"[AVISO] {ctx.aviso}")
+    simular_frota(ctx, args.dias, args.leituras_por_dia,
                   args.seed, args.limpar, args.taxa_falhas)
+    ctx.repo.definir_configuracao(CHAVE_VERSAO_DEMO, VERSAO_DEMO)
+    print(f"[OK] Marcador de demonstração: {CHAVE_VERSAO_DEMO}={VERSAO_DEMO}")
 
 
 def simular_frota(ctx, dias: int = 14, leituras_por_dia: int = 8,
@@ -121,7 +137,8 @@ def simular_frota(ctx, dias: int = 14, leituras_por_dia: int = 8,
             for regiao, perfil in PERFIL_REGIAO.items()
         }
         for equip in equipamentos:
-            operador, _, prob_respeitar = OPERADORES[equip["codigo"]]
+            operador, _, prob_respeitar = OPERADORES.get(
+                equip["codigo"], ("op.teste", 0.0, 0.75))
             minutos = np.sort(rng.integers(6 * 60, 19 * 60, size=leituras_por_dia))
             for minuto in minutos:
                 momento = datetime.combine(dia, datetime.min.time()) + timedelta(minutes=int(minuto))
@@ -165,17 +182,36 @@ def simular_frota(ctx, dias: int = 14, leituras_por_dia: int = 8,
     print(f"[OK] {rejeitadas} entradas recusadas (falha de sensor ou retransmissao), registradas em `rejeicoes`")
     if erros:
         print(f"[AVISO] {erros} erros de processamento")
-    print(f"[OK] Banco: {ctx.repo.caminho}")
+    print(f"[OK] Banco: {getattr(ctx, 'backend', getattr(ctx.repo, 'backend', 'sqlite'))} — {ctx.repo.caminho}")
     if erros:
         raise RuntimeError(f"A simulacao teve {erros} erros de processamento.")
     return total
 
 
 def popular_demonstracao(ctx) -> int:
-    """Popula apenas bancos sem leituras; nunca substitui dados existentes."""
-    if not ctx.repo.consultar("SELECT 1 FROM leituras LIMIT 1").empty:
+    """Popula a demonstracao uma unica vez por versao, sem tocar em dados reais.
+
+    - banco vazio: gera a frota ficticia e grava o marcador de versao;
+    - dados reais (sem marcador): nao altera nada;
+    - marcador antigo: remove SOMENTE `origem='simulador'` e regera.
+    """
+    versao = ctx.repo.obter_configuracao(CHAVE_VERSAO_DEMO)
+    if versao == VERSAO_DEMO:
         return 0
-    return simular_frota(ctx)
+
+    tem_leituras = not ctx.repo.consultar("SELECT 1 FROM leituras LIMIT 1").empty
+    if tem_leituras and not versao:
+        # Banco com dados do usuario: a demonstracao nunca substitui dados reais.
+        return 0
+
+    if versao and versao != VERSAO_DEMO:
+        removidas = ctx.repo.remover_por_origem(ORIGEM)
+        if removidas:
+            print(f"[INFO] Demonstração antiga ({versao}) regerada: {removidas} leituras simuladas removidas")
+
+    total = simular_frota(ctx)
+    ctx.repo.definir_configuracao(CHAVE_VERSAO_DEMO, VERSAO_DEMO)
+    return total
 
 
 if __name__ == "__main__":

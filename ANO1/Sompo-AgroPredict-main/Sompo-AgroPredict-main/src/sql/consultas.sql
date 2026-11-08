@@ -1,9 +1,9 @@
 -- =====================================================================
--- Sompo AgroPredict - Queries de Consulta e Analise
--- Sprint 2 - Challenge Sompo x FIAP
+-- AgroPredict - Queries de Consulta e Analise
+-- Sprint 2 - Challenge FIAP
 -- =====================================================================
 -- Conjunto de queries uteis para alimentar dashboards, relatorios da
--- Sompo e auditoria das decisoes do modelo.
+-- AgroPredict e auditoria das decisoes do modelo.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -54,7 +54,7 @@ ORDER BY score_medio DESC;
 
 
 -- ---------------------------------------------------------------------
--- 4. Taxa de aderencia dos operadores aos alertas (relatorio Sompo)
+-- 4. Taxa de aderencia dos operadores aos alertas (relatório de auditoria de risco)
 -- ---------------------------------------------------------------------
 SELECT
     o.id_operador,
@@ -76,7 +76,7 @@ ORDER BY taxa_aderencia_pct DESC NULLS LAST;
 
 -- ---------------------------------------------------------------------
 -- 5. Identificacao de fatores de risco predominantes
--- (auxilia analise da Sompo sobre o que mais causa sinistros)
+-- (auxilia análise de risco sobre o que mais causa sinistros)
 -- ---------------------------------------------------------------------
 SELECT
     'Solo saturado + chuva recente' AS cenario,

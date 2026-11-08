@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from agropredict.persistencia import RepositorioSQLite  # noqa: E402
+from agropredict.fabrica import criar_repositorio  # noqa: E402
 from agropredict.seguranca import PERFIS, SenhaFraca, ServicoAutenticacao  # noqa: E402
 
 
@@ -38,7 +38,7 @@ def ler_senha() -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Usuarios do Sompo AgroPredict")
+    parser = argparse.ArgumentParser(description="Usuarios do AgroPredict")
     sub = parser.add_subparsers(dest="comando", required=True)
 
     criar = sub.add_parser("criar", help="cria o usuario ou redefine senha/perfil")
@@ -52,7 +52,10 @@ def main() -> None:
     desativar.add_argument("--usuario", required=True)
 
     args = parser.parse_args()
-    repo = RepositorioSQLite()
+    repo, backend, aviso = criar_repositorio()
+    if aviso:
+        print(f"[AVISO] {aviso}")
+    print(f"[INFO] Banco: {backend}")
 
     if args.comando == "criar":
         try:

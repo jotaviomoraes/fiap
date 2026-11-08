@@ -266,8 +266,7 @@ def e_corrupcao(ctx, v: Verificacoes) -> None:
     entrada = {"umidade_solo": 18, "declividade": 5, "chuva_24h": 2, "temperatura": 25, "velocidade": 6,
                "idade_maquina": 3, "horas_operacao": 3, "status_operacao": "Colheita"}
     id_leitura = ctx.servico.registrar_leitura(entrada, 1, "validacao", origem="validacao-corrupcao")
-    with ctx.repo.conexao() as conn:
-        conn.execute("UPDATE leituras SET velocidade = 19.5 WHERE id_leitura = ?", (id_leitura,))
+    ctx.repo.executar("UPDATE leituras SET velocidade = 19.5 WHERE id_leitura = ?", [id_leitura])
     try:
         ctx.servico.processar_leitura(id_leitura)
         obtido, ok = "processada mesmo alterada", False
@@ -313,7 +312,7 @@ def main() -> None:
 
     v = Verificacoes()
     with tempfile.TemporaryDirectory() as pasta:
-        ctx = criar_contexto(db_path=Path(pasta) / "validacao.db", com_oracle=False)
+        ctx = criar_contexto(db_path=Path(pasta) / "validacao.db", com_oracle=False, backend="sqlite")
         inicio = time.perf_counter()
         real = a_fonte_real(ctx, v, args.sem_rede)
         b_falhas_da_fonte(v)

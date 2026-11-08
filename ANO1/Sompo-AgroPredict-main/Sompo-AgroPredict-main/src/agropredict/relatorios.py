@@ -115,7 +115,7 @@ class Relatorios:
                        SUM(classe_risco = 'ALTO')   AS qtd_alto,
                        COALESCE(SUM(acao_tomada = 'PENDENTE'), 0) AS alertas_pendentes
                 FROM vw_predicoes {where}
-                GROUP BY id_equipamento
+                GROUP BY id_equipamento, equipamento, tipo_equipamento, modelo, fabricante, regiao
                 ORDER BY score_medio DESC, qtd_alto DESC""",
             params,
         )
@@ -221,7 +221,7 @@ class Relatorios:
         )
 
     # ------------------------------------------------------------------
-    # US-03 — analista Sompo
+    # US-03 — analista Jo?o
     # ------------------------------------------------------------------
     def aderencia_operadores(self, f: Filtros) -> pd.DataFrame:
         """Taxa de aderencia = respeitados / respondidos (pendentes ficam de fora)."""
@@ -315,7 +315,7 @@ class Relatorios:
                        COALESCE(SUM(v.categoria_alerta = 'mecanico' AND v.nivel_alerta = 'ALTO'), 0) AS mecanicos_alto,
                        MAX(CASE WHEN v.categoria_alerta = 'mecanico' THEN v.data_hora END) AS ultimo_alerta_mecanico
                 FROM vw_predicoes v {where}
-                GROUP BY v.id_equipamento""",
+                GROUP BY v.id_equipamento, v.equipamento, v.tipo_equipamento, v.modelo, v.regiao""",
             params,
         )
         if df.empty:
@@ -343,14 +343,19 @@ class Relatorios:
         where_l = where_l.replace("l.regiao", "e.regiao")
         base = f"""FROM leituras l JOIN equipamentos e ON e.id_equipamento = l.id_equipamento {where_l}"""
         status = self.repo.consultar(
-            f"SELECT l.status_processamento AS status, COUNT(*) AS leituras {base} GROUP BY 1", params_l)
+            f"SELECT l.status_processamento AS status, COUNT(*) AS leituras {base} GROUP BY l.status_processamento", params_l)
         fontes = self.repo.consultar(
             f"""SELECT fonte, SUM(manual) AS manuais, COUNT(*) AS total FROM (
-                    SELECT 'umidade' AS fonte, l.fonte_umidade = 'manual' AS manual {base}
-                    UNION ALL SELECT 'clima', l.fonte_clima = 'manual' {base}
-                    UNION ALL SELECT 'velocidade', l.fonte_velocidade = 'manual' {base}
-                    UNION ALL SELECT 'horas', l.fonte_horas = 'manual' {base}
-                    UNION ALL SELECT 'idade', l.fonte_idade = 'manual' {base}
+                    SELECT 'umidade' AS fonte,
+                           CASE WHEN l.fonte_umidade = 'manual' THEN 1 ELSE 0 END AS manual {base}
+                    UNION ALL SELECT 'clima',
+                           CASE WHEN l.fonte_clima = 'manual' THEN 1 ELSE 0 END {base}
+                    UNION ALL SELECT 'velocidade',
+                           CASE WHEN l.fonte_velocidade = 'manual' THEN 1 ELSE 0 END {base}
+                    UNION ALL SELECT 'horas',
+                           CASE WHEN l.fonte_horas = 'manual' THEN 1 ELSE 0 END {base}
+                    UNION ALL SELECT 'idade',
+                           CASE WHEN l.fonte_idade = 'manual' THEN 1 ELSE 0 END {base}
                 ) GROUP BY fonte""",
             params_l * 5,
         )

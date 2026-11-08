@@ -27,8 +27,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 
 from agropredict.config import DATA_DIR  # noqa: E402
+from agropredict.fabrica import criar_repositorio  # noqa: E402
 from agropredict.markdown import tabela_markdown  # noqa: E402
-from agropredict.persistencia import RepositorioSQLite  # noqa: E402
 from agropredict.regras import ALERTA, CATEGORIA_POR_VARIAVEL, MAXIMO  # noqa: E402
 from agropredict.relatorios import Filtros, Relatorios  # noqa: E402
 
@@ -39,7 +39,7 @@ def _pct(parte, total) -> str:
     return f"{100 * parte / total:.1f}%" if total else "—"
 
 
-def gerar(relatorios: Relatorios, filtros: Filtros) -> str:
+def gerar(relatorios: Relatorios, filtros: Filtros, backend: str = "sqlite") -> str:
     r = relatorios
     resumo = r.resumo(filtros)
     total = int(resumo["total"])
@@ -61,7 +61,8 @@ def gerar(relatorios: Relatorios, filtros: Filtros) -> str:
         "# Relatório de risco da frota",
         "",
         f"> Gerado por `scripts/gerar_relatorio.py` em {datetime.now():%d/%m/%Y %H:%M} · período "
-        f"{filtros.data_inicio:%d/%m/%Y} a {filtros.data_fim:%d/%m/%Y} · fonte: SQLite (`vw_predicoes`). "
+        f"{filtros.data_inicio:%d/%m/%Y} a {filtros.data_fim:%d/%m/%Y} · fonte: "
+        f"{'Oracle Autonomous Database' if backend == 'oracle' else 'SQLite'} (`vw_predicoes`). "
         "Dados da frota fictícia de demonstração.",
         "",
         "## 1. Resumo do período (gestor — CA-02.1)",
@@ -124,7 +125,7 @@ def gerar(relatorios: Relatorios, filtros: Filtros) -> str:
         tabela_markdown(alertas.groupby(["nivel", "categoria", "acao_tomada"]).size()
                         .reset_index(name="alertas").rename(columns={"nivel": "nível", "acao_tomada": "situação"})),
         "",
-        "## 6. Analista Sompo (US-03)",
+        "## 6. Analista João (US-03)",
         "",
         "### Aderência dos operadores aos alertas (CA-03.1)",
         "",
@@ -161,10 +162,13 @@ def main() -> None:
 
     hoje = date.today()
     filtros = Filtros(data_inicio=hoje - timedelta(days=args.dias - 1), data_fim=hoje)
-    texto = gerar(Relatorios(RepositorioSQLite()), filtros)
+    repo, backend, aviso = criar_repositorio()
+    if aviso:
+        print(f"[AVISO] {aviso}")
+    texto = gerar(Relatorios(repo), filtros, backend)
     args.saida.parent.mkdir(parents=True, exist_ok=True)
     args.saida.write_text(texto, encoding="utf-8")
-    print(f"[OK] Relatório salvo em {args.saida}")
+    print(f"[OK] Relatório salvo em {args.saida} (banco: {backend})")
 
 
 if __name__ == "__main__":

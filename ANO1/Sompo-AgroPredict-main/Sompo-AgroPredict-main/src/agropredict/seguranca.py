@@ -26,11 +26,12 @@ PERFIS = {
     "operador": "Operador de campo",
     "gestor": "Gestor de frota",
     "tecnico": "Tecnico de manutencao",
-    "analista": "Analista Sompo",
+    "analista": "Analista João",
     "admin": "Administrador",
 }
 
 PERMISSOES = {
+    "feedback": set(PERFIS),
     "operacao": {"operador", "gestor", "admin"},
     "frota": {"gestor", "analista", "admin"},
     "alertas": {"operador", "gestor", "tecnico", "analista", "admin"},

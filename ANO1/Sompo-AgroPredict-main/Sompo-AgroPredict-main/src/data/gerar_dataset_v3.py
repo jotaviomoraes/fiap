@@ -1,7 +1,7 @@
 """
 gerar_dataset_v3.py
 -------------------
-Geracao do dataset simulado v3 do Sompo AgroPredict (Sprint 4).
+Geracao do dataset simulado v3 do AgroPredict (Sprint 4).
 
 Diferencas em relacao a v2 (Sprint 2):
 - Volume: 3000 linhas (antes 1000), com a mesma logica de cenarios e de

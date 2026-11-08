@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================
-# Sompo AgroPredict - inicializacao do dashboard (Linux / macOS)
+# AgroPredict - inicializacao do dashboard (Linux / macOS)
 # ---------------------------------------------------------------------
 # Uso, a partir da raiz do repositorio:
 #     bash scripts/run_dashboard.sh
@@ -18,5 +18,5 @@ if [ ! -f "$APP" ]; then
   exit 1
 fi
 
-echo "Iniciando Sompo AgroPredict em http://localhost:8501 ..."
+echo "Iniciando AgroPredict em http://localhost:8501 ..."
 streamlit run "$APP"

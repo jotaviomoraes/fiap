@@ -155,7 +155,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("Sompo AgroPredict - Ingestao de predicoes no Oracle XE")
+    print("AgroPredict - Ingestao de predicoes no Oracle XE")
     print("=" * 60)
 
     modelo = carregar_modelo()

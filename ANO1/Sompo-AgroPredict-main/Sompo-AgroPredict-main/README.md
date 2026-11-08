@@ -6,7 +6,7 @@
 
 <br>
 
-# Sompo AgroPredict
+# AgroPredict
 
 ## 👨‍🎓 Integrantes:
 - Renata de Almeida Marinho — RM569342
@@ -39,8 +39,8 @@
 [![Status](https://img.shields.io/badge/Status-MVP%20validado-2C5F2D)](#)
 [![F1 macro](https://img.shields.io/badge/F1%20macro%20(teste)-97.6%25-2C5F2D)](#-modelo-preditivo-final)
 [![Recall ALTO](https://img.shields.io/badge/Recall%20ALTO-99.1%25-2C5F2D)](#-modelo-preditivo-final)
-[![Testes](https://img.shields.io/badge/Testes-78%20passando-1A2E1A)](#-validação-e-evidências)
-[![Challenge](https://img.shields.io/badge/Challenge-Sompo%20%C3%97%20FIAP-1A2E1A)](#)
+[![Testes](https://img.shields.io/badge/Testes-87%20passando-1A2E1A)](#-validação-e-evidências)
+[![Challenge](https://img.shields.io/badge/Challenge-FIAP-1A2E1A)](#)
 
 ---
 
@@ -48,7 +48,7 @@
 
 > **Do reativo ao preditivo: prevenção de riscos operacionais em equipamentos agrícolas.**
 
-O **Sompo AgroPredict** é uma plataforma de monitoramento preventivo de risco operacional para
+O **AgroPredict** é uma plataforma de monitoramento preventivo de risco operacional para
 equipamentos agrícolas. A premissa é simples: **em vez de pagar o sinistro depois, calcular o risco
 antes**. O sistema coleta variáveis ambientais e operacionais, classifica o risco de cada operação em
 BAIXO, MÉDIO ou ALTO com um score de 0 a 100 e devolve, para cada perfil de usuário, a informação que
@@ -65,7 +65,7 @@ vem acompanhado de evidências automáticas de funcionamento.
 | 📡 **Operador de campo** | Card de risco em tempo real, recomendação em linguagem direta, **"Por que esse risco?"** com as 3 variáveis que mais pesaram, **alerta sonoro e vibração** e resposta ao alerta (respeitei / ignorei) | US-01 |
 | 🚜 **Gestor de frota** | Visão da frota: resumo do período, **ranking de equipamentos**, drilldown com padrão por hora do dia, **tendências por equipamento, região e tipo de operação**, fatores de risco e lista de alertas | US-02 |
 | 🔧 **Técnico de manutenção** | Prioridade de manutenção por equipamento, com critério declarado, e alertas mecânicos | — |
-| 🔎 **Analista Sompo** | Aderência dos operadores, **score de comportamento preventivo por produtor**, análise forense de sinistro, **auditoria completa de cada decisão** (probabilidades, versão do modelo, hash de integridade, explicação) e qualidade da coleta | US-03 |
+| 🔎 **Analista João** | Aderência dos operadores, **score de comportamento preventivo por produtor**, análise forense de sinistro, **auditoria completa de cada decisão** (probabilidades, versão do modelo, hash de integridade, explicação) e qualidade da coleta | US-03 |
 
 Todas as telas têm exportação CSV, e o relatório consolidado da frota pode ser gerado em Markdown
 por script.
@@ -99,14 +99,14 @@ flowchart TB
         B4["⚡ Regras de domínio<br/>(override, score,<br/>recomendação, alerta)"]
     end
 
-    subgraph PERSIST["🗄️ SQLITE — BANCO PRINCIPAL"]
+    subgraph PERSIST["🗄️ ORACLE — BANCO PRINCIPAL"]
         R[("rejeicoes<br/>inválidas e duplicadas")]
         L[("leituras<br/>+ hash, fonte de cada dado")]
         P[("predicoes + alertas<br/>probabilidades, versão, explicação")]
         U[("usuarios + log_acessos")]
     end
 
-    D1[("Oracle XE<br/>réplica opcional")]
+    D1[("SQLite<br/>fallback automático")]
 
     subgraph SAIDAS["📤 SAÍDA — DASHBOARD POR PERFIL + RELATÓRIOS"]
         C1["📡 Operação<br/>(Operador)"]
@@ -128,7 +128,7 @@ flowchart TB
     L -- "2. lê do banco" --> H
     H --> B2 --> B4
     B4 -- "3. grava a saída" --> P
-    S -. opcional .-> D1
+    S -. Oracle indisponível .-> D1
     P --> C1 & C2 & C4 & C3 & C5
     U --> SAIDAS
 ```
@@ -152,13 +152,14 @@ flowchart TB
    da causa dominante.
 7. **Banco (saída)** — predição, probabilidades, versão e hash do modelo, explicação e alerta (MÉDIO
    ou ALTO) são gravados **na mesma transação** que marca a leitura como `PROCESSADA`.
-8. **Saída** — o dashboard mostra o resultado conforme o perfil, e a réplica Oracle (opcional)
-   recebe exatamente o mesmo resultado.
+8. **Saída** — o dashboard mostra o resultado conforme o perfil. O Oracle Autonomous Database é o
+   banco principal; se ele estiver indisponível, o sistema cai automaticamente para o SQLite local e
+   avisa na tela.
 
 **Por que uma camada de serviço:** o dashboard, o simulador de frota, a validação da integração e a
 ingestão em lote no Oracle chamam o mesmo `ServicoAvaliacao`. O fluxo funciona sem a tela aberta e a
-mesma entrada gera sempre o mesmo score, a mesma classe e a mesma recomendação, qualquer que seja o
-banco.
+mesma entrada gera sempre o mesmo score, a mesma classe e a mesma recomendação, em qualquer backend
+(Oracle ou SQLite).
 
 ---
 
@@ -168,8 +169,9 @@ banco.
 
 | Requisito | Versão | Observação |
 |---|---|---|
-| Python | 3.10+ | Obrigatório (testado com 3.13) |
-| Oracle XE | 21c | **Opcional** — o sistema funciona sem ele |
+| Python | 3.10+ | Obrigatório (testado com 3.14) |
+| Oracle Autonomous Database | 19c+ | **Banco principal** — conexão Thin, sem Instant Client |
+| SQLite | 3.35+ | **Fallback automático** quando o Oracle não está configurado/indisponível |
 | Navegador móvel | — | Necessário só para GPS/clima em tempo real |
 
 Todos os comandos abaixo devem ser executados **a partir da raiz do repositório**.
@@ -212,14 +214,16 @@ ou `admin`). A senha é pedida no terminal e gravada apenas como hash PBKDF2:
 python scripts/gerenciar_usuarios.py criar --usuario operador1 --perfil operador --nome "Operador de campo"
 python scripts/gerenciar_usuarios.py criar --usuario gestor1   --perfil gestor   --nome "Gestor de frota"
 python scripts/gerenciar_usuarios.py criar --usuario tecnico1  --perfil tecnico  --nome "Técnico de manutenção"
-python scripts/gerenciar_usuarios.py criar --usuario analista1 --perfil analista --nome "Analista Sompo"
+python scripts/gerenciar_usuarios.py criar --usuario analista1 --perfil analista --nome "Analista João"
 ```
 
 > Alternativa: definir `APP_USERNAME` e `APP_PASSWORD` (mínimo de 8 caracteres) antes de subir o
 > dashboard. Esse usuário é criado automaticamente com o perfil de `APP_PERFIL` (padrão `admin`).
 
-**3. Frota simulada** — 6 equipamentos em 3 regiões, 14 dias, cada leitura pelo mesmo fluxo do
-dashboard (2% das leituras simulam falha de sensor ou retransmissão, para exercitar a rastreabilidade):
+**3. Frota simulada** — 8 equipamentos (5 colheitadeiras, 2 tratores e 1 pulverizador), 4 operadores,
+4 fazendas e 3 regiões; 42 dias com 24 leituras por dia e por equipamento (~8.000 leituras), cada uma
+pelo mesmo fluxo do dashboard. 2% das leituras simulam falha de sensor ou retransmissão, para
+exercitar a rastreabilidade:
 
 ```bash
 python scripts/simular_frota.py --limpar
@@ -233,9 +237,11 @@ streamlit run src/dashboard/app.py
 # Acessar: http://localhost:8501
 ```
 
-O dashboard popula automaticamente um banco sem leituras com 14 dias de dados fictícios,
-reutilizando o simulador, sem apagar dados existentes. Isso também funciona no Streamlit
-Community Cloud: basta enviar o código para o GitHub, sem versionar o SQLite.
+O dashboard popula automaticamente um banco sem leituras com 42 dias de dados fictícios,
+reutilizando o simulador, sem apagar dados existentes. Se o Oracle estiver configurado em
+`config/.env`, ele é o banco usado; caso contrário (ou se a conexão falhar), o SQLite local entra
+como fallback e um aviso aparece na tela. Isso também funciona no Streamlit Community Cloud: basta
+enviar o código para o GitHub, sem versionar o SQLite.
 A primeira execução pode demorar enquanto as predições são calculadas.
 Para desativar essa inicialização, defina `APP_DEMO="false"` nas variáveis de ambiente
 ou nos Secrets do Streamlit Cloud. O SQLite do Cloud não é armazenamento permanente;
@@ -253,23 +259,31 @@ python scripts/validar_integracao.py
 python scripts/gerar_relatorio.py
 ```
 
-**6. (Opcional) Oracle XE** — o SQLite é o banco principal; o Oracle recebe uma réplica quando
-configurado:
+**6. Oracle Autonomous Database (banco principal)** — preencha `config/.env` a partir de
+[`config/.env.example`](config/.env.example) e crie/valide o schema de forma idempotente (nada é
+apagado):
 
 ```bash
-sqlplus "usuario"/"senha"@XE
-SQL> @src/sql/schema.sql
+python scripts/criar_schema_oracle.py
 ```
 
-Depois defina `ORACLE_USER`, `ORACLE_PASSWORD` e `ORACLE_DSN` (modelo em
-[`config/.env.example`](config/.env.example)). Ingestão em lote: `python src/sql/inserir_predicoes.py --n 100`.
+O modo Thin usa a wallet (`ewallet.pem` + `tnsnames.ora`) sem Oracle Instant Client. Se o Oracle não
+estiver acessível, o sistema continua no SQLite automaticamente. Para forçar um backend, use
+`DB_BACKEND=oracle`, `DB_BACKEND=sqlite` ou `DB_BACKEND=auto` (padrão). Ingestão em lote:
+`python src/sql/inserir_predicoes.py --n 100`.
+
+### Idiomas do dashboard
+
+A interface do dashboard está disponível em **português, inglês e espanhol**. Use o seletor
+**Idioma** na barra lateral (ou o parâmetro `?lang=en`/`?lang=es`). Os dados gravados permanecem em
+português; apenas rótulos, mensagens, gráficos e tabelas são traduzidos.
 
 ---
 
 ## 📁 Estrutura de pastas
 
 ```
-Sompo-AgroPredict/
+AgroPredict/
 ├── README.md
 ├── .github/                           # Modelo de relato de problema
 ├── assets/                            # Logo, gráficos do modelo e prints do dashboard
@@ -286,9 +300,10 @@ Sompo-AgroPredict/
 │   ├── simular_frota.py               # Frota fictícia pelo fluxo real
 │   ├── validar_integracao.py          # Validação das fontes de dados → evidência
 │   ├── gerar_relatorio.py             # Relatório consolidado da frota (salvo em data/)
+│   ├── criar_schema_oracle.py         # Schema idempotente no Oracle Autonomous Database
 │   ├── gerenciar_usuarios.py          # Usuários e perfis de acesso
 │   └── run_dashboard.ps1 / .sh        # Sobe o dashboard
-├── tests/                             # 78 testes automatizados (unittest)
+├── tests/                             # Testes automatizados (unittest)
 ├── data/                              # Gerado em runtime, não versionado (SQLite + log)
 └── src/
     ├── agropredict/                   # Camada de serviço (sem dependência de interface)
@@ -298,17 +313,19 @@ Sompo-AgroPredict/
     │   ├── modelo.py                  # Carrega modelo + metadados; explicação local
     │   ├── avaliacao.py               # Modelo + regras → Avaliacao (fonte única do score)
     │   ├── integridade.py             # Hash SHA-256 das leituras
-    │   ├── persistencia.py            # Repositório SQLite com migrações versionadas
+    │   ├── persistencia.py            # Repositório SQLite (migrações + fallback)
+    │   ├── repositorio_oracle.py      # Repositório Oracle (pool, MERGE, SQL portável)
     │   ├── servico.py                 # Orquestrador: entrada → banco → modelo → saída
     │   ├── relatorios.py              # Consultas por equipamento, região, operação, auditoria
     │   ├── seguranca.py               # Hash de senha, bloqueio e perfis de acesso (RBAC)
     │   ├── telemetria.py              # Velocidade por GPS (chip ou Haversine)
     │   ├── clima.py                   # Integração com a Open-Meteo
-    │   ├── oracle.py                  # Réplica opcional no Oracle XE
+    │   ├── oracle.py                  # Replicação legada (opcional, Oracle XE)
     │   ├── markdown.py                # Tabelas dos relatórios gerados
-    │   ├── config.py / fabrica.py     # Configuração, logging e montagem dos serviços
+    │   ├── config.py / fabrica.py     # .env, escolha do backend e montagem dos serviços
     ├── dashboard/                     # Interface Streamlit (apenas entrada e saída)
-    │   ├── app.py                     # Login e menu conforme o perfil
+    │   ├── app.py                     # Login, idioma e menu conforme o perfil
+    │   ├── i18n.py / traducoes.py     # PT/EN/ES: t(), domínios, formatação e catálogo
     │   ├── ui_comum.py                # Filtros, exportação CSV, alerta sonoro, explicação
     │   ├── gps.py                     # Geolocalização do navegador
     │   └── paginas/                   # operacao, frota, alertas, manutencao, auditoria
@@ -321,25 +338,46 @@ Sompo-AgroPredict/
     │   ├── modelo_meta.json           # Versão, hiperparâmetros, métricas, qualidade
     │   ├── modelo_v1.pkl              # Modelo da Sprint 2/3, mantido para comparação
     │   └── random_forest.ipynb        # Notebook exploratório da Sprint 2
-    └── sql/                           # Schema Oracle, consultas e ingestão em lote
+    └── sql/                           # schema_oracle.sql, consultas e ingestão em lote
 ```
 
 ---
 
 ## 🗃 Engenharia de dados
 
-### Banco principal — SQLite (`data/agropredict.db`)
+### Banco principal — Oracle Autonomous Database (modo Thin)
 
-Criado automaticamente, com **migrações versionadas** (`PRAGMA user_version`): um banco de uma sprint
-anterior é atualizado na primeira conexão, sem perder dados.
+O Oracle é o backend **principal**. A conexão usa a wallet (`ewallet.pem` + `tnsnames.ora`) e o modo
+Thin do `python-oracledb`, sem Oracle Instant Client. As credenciais ficam em `config/.env` (fora do
+versionamento) e o schema é criado de forma **idempotente e não destrutiva**:
+
+```bash
+python scripts/criar_schema_oracle.py   # cria só o que ainda não existe
+```
+
+Execute essa preparação antes de abrir o dashboard pela primeira vez e após
+atualizações do schema. A abertura do app apenas conecta ao banco; não executa
+DDL nem recria a view. O script preserva os dados existentes.
+
+`DB_BACKEND` escolhe o backend:
+
+| Valor | Comportamento |
+|---|---|
+| `auto` (padrão) | Tenta o Oracle; se não estiver configurado ou falhar, usa SQLite e mostra um aviso na tela |
+| `oracle` | Exige o Oracle — falha explicitamente se a conexão não funcionar |
+| `sqlite` | Usa apenas o SQLite local (`data/agropredict.db`) |
+
+O schema é o mesmo nos dois bancos, com as tabelas abaixo e consultas escritas em SQL portável
+(`?`, `LIMIT`, `strftime`), traduzidas pelo repositório Oracle conforme o dialeto.
 
 | Tabela / view | Conteúdo |
 |---|---|
-| `equipamentos` | Frota com tipo, modelo, fabricante, ano, fazenda e **região** |
+| `equipamentos` | Frota (18 equipamentos na demonstração) com tipo, modelo, fabricante, ano, fazenda e **região** |
 | `leituras` | Entrada bruta: 8 variáveis, equipamento, operador, origem, **fonte de cada dado**, posição, **hash SHA-256** e status (`PENDENTE`, `PROCESSADA`, `ERRO`) |
 | `predicoes` | Classe do modelo e final, score, **probabilidades**, override e motivo, variáveis em alerta, **explicação local**, recomendação, **versão e hash do modelo** |
 | `alertas` | Nível, categoria (climático, operacional, mecânico), mensagem e ação tomada, com quem respondeu e quando |
 | `rejeicoes` | Toda entrada recusada — inválida ou duplicada — com motivo e dados recebidos |
+| `configuracoes` | Pares chave/valor persistentes (ex.: versão da demonstração) |
 | `usuarios` / `log_acessos` | Perfis, senha em hash e trilha de acessos |
 | `vw_predicoes` | Visão única (entrada + decisão + equipamento + alerta) usada pelos relatórios |
 
@@ -369,10 +407,16 @@ auditável:
 pré-processamento. Em produção, a mesma lógica aparece na validação de entrada: nenhuma leitura
 incompleta chega ao modelo.
 
-### Réplica opcional — Oracle XE
+### Fallback local — SQLite (`data/agropredict.db`)
 
-O schema em [`src/sql/schema.sql`](src/sql/schema.sql) (equipamentos, operadores, predições, alertas,
-view de métricas diárias) recebe a mesma predição gravada no SQLite. As consultas analíticas estão em
+Quando o Oracle não está disponível, o SQLite assume com **migrações versionadas**
+(`PRAGMA user_version`): um banco de uma sprint anterior é atualizado na primeira conexão, sem perder
+dados. É o modo usado em desenvolvimento, testes e demonstração offline.
+
+### Scripts SQL Oracle
+
+O schema documentado está em [`src/sql/schema_oracle.sql`](src/sql/schema_oracle.sql); o modo
+automático (idempotente) é o `scripts/criar_schema_oracle.py`. As consultas analíticas estão em
 [`src/sql/consultas.sql`](src/sql/consultas.sql).
 
 ---
@@ -440,7 +484,7 @@ motivo.
 
 | Evidência | Como é gerada | Resultado |
 |---|---|---|
-| [`resultado_testes.txt`](document/evidencias/resultado_testes.txt) | `python -m unittest discover -s tests -t tests` | **78 testes passando** |
+| [`resultado_testes.txt`](document/evidencias/resultado_testes.txt) | `python -m unittest discover -s tests -t tests` | **87 testes passando** |
 | [`validacao_integracao.md`](document/evidencias/validacao_integracao.md) | `python scripts/validar_integracao.py` | **21 de 21 verificações OK** |
 | [`relatorio_modelo.md`](document/relatorio_modelo.md) | `python src/modelo/treinar_modelo.py` | Métricas, comparação e justificativas do modelo |
 | Prints `assets/14..22` | Dashboard com a frota simulada | Telas de cada perfil (abaixo) |
@@ -502,7 +546,7 @@ CPF); criptografia do arquivo SQLite em repouso (em produção, disco criptograf
 | 🚜 Frota e tendências | | ✅ | | ✅ | ✅ |
 | 🚨 Alertas | ✅ (só os seus) | ✅ | ✅ (mecânicos por padrão) | ✅ | ✅ |
 | 🔧 Manutenção | | ✅ | ✅ | | ✅ |
-| 🔎 Auditoria Sompo | | | | ✅ | ✅ |
+| 🔎 Auditoria de risco | | | | ✅ | ✅ |
 
 ### Critérios de alerta (explícitos na tela)
 
@@ -545,7 +589,7 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 |---|---|---|---|
 | **US-01** | Operador de Campo | Alerta preventivo em tempo real com sinalização visual + sonora | 4/4 critérios implementados |
 | **US-02** | Gestor de Frota | Visão da frota com ranking de equipamentos, drilldown e fatores de risco | 4/4 critérios implementados |
-| **US-03** | Analista Sompo | Aderência, comportamento do produtor, análise forense e auditoria | 4/4 critérios implementados |
+| **US-03** | Analista João | Aderência, comportamento do produtor, análise forense e auditoria | 4/4 critérios implementados |
 
 ---
 
@@ -560,7 +604,8 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 | 2 | Random Forest com baseline de Regressão Logística | Captura interações não lineares ("umidade alta **e** chuva") e oferece importância das variáveis |
 | 2 | Regras de domínio com **override** para ALTO | Em situação inequivocamente perigosa, a segurança não depende de um modelo treinado em dados simulados |
 | 3 | GPS do celular + Open-Meteo com substituição manual campo a campo | Dados reais sem hardware dedicado, sem parar a operação quando um sensor falha |
-| 3 | **SQLite como banco principal**, Oracle como réplica opcional | O MVP roda em qualquer máquina, sem serviço externo, mantendo o caminho para um banco central |
+| 3 | **Oracle Autonomous Database como banco principal**, SQLite como fallback automático | Banco central sem Instant Client (modo Thin + wallet), mantendo a demonstração funcional mesmo offline |
+| 4 | Interface em **PT/EN/ES** com seletor de idioma | Demonstração internacional sem duplicar telas: o português é a chave e os catálogos EN/ES são testados automaticamente |
 | 3.1 | Camada de serviço independente da interface | Correção do feedback: o fluxo não pode depender da tela |
 | 3.1 | Score = **risco esperado** em uma única função | Correção do feedback: SQLite e Oracle gravavam scores diferentes. A Sprint 1 definia o score como a probabilidade da classe prevista, mas essa é a confiança do modelo, não o risco |
 | 3.1 | Perfis de acesso e visão de frota | Correção do feedback: três personas com um único perfil e sem visão por equipamento/região |
@@ -581,7 +626,7 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 | Banco | Conceitual | Schema Oracle (4 tabelas, view, constraints) | SQLite com histórico | Leituras antes do modelo, integridade, rejeições, migrações |
 | Interface | Mockups | Dashboard único | Dashboard com telemetria | 5 páginas por perfil, alertas sonoros, exportação |
 | Segurança | Diretrizes (autenticação, criptografia, LGPD) | Constraints, chaves estrangeiras e versão do modelo por predição | Login único e log de acesso | RBAC, senha em hash, bloqueio, integridade, auditoria completa |
-| Validação | — (proposta documentada, sem código) | Métricas no notebook | Execução manual | 78 testes + validação de integração + relatório gerados por script |
+| Validação | — (proposta documentada, sem código) | Métricas no notebook | Execução manual | 87 testes + validação de integração + relatório gerados por script |
 
 ---
 
@@ -597,8 +642,8 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
   de horas depende da aba aberta.
 - **Alerta sonoro e vibração** dependem do navegador: o som pode exigir uma interação prévia com a
   página e a vibração só existe em celulares Android. O alerta visual vale sempre.
-- **Banco local:** o SQLite fica na máquina de quem roda o dashboard; a sincronização central seria o
-  papel do Oracle.
+- **Fallback local:** se o Oracle não estiver configurado ou acessível, o SQLite assume na máquina de
+  quem roda o dashboard; o aviso aparece na tela e nada é perdido.
 - **Frota e operadores fictícios**, identificados como `origem = 'simulador'` no banco.
 - **Visão da Sprint 1 fora do MVP:** modo offline no celular (arquitetura *Edge + Cloud*), mapa de calor
   por talhão e inclinação lateral pelo giroscópio do celular continuam como evolução de produto.
@@ -618,7 +663,7 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
     * Modelo v2.0 (Gradient Boosting): F1 macro 97,6% e recall de ALTO 99,1% no teste; explicação local por predição
     * Hash de integridade por leitura, rejeição rastreável de entradas inválidas e duplicadas, migrações de banco
     * Alerta sonoro e vibração, score de comportamento do produtor, qualidade da coleta e exportação CSV
-    * Validação da integração, relatório consolidado e pipeline de ponta a ponta com um comando; 78 testes
+    * Validação da integração, relatório consolidado e pipeline de ponta a ponta com um comando; 87 testes
 * 0.3.1 - 26/09/2026 — **Correções a partir do feedback da Sprint 3**
     * Camada de serviço `src/agropredict`; leitura gravada antes do modelo; score único para SQLite e Oracle
     * Probabilidades e versão do modelo no SQLite; perfis de acesso; páginas de frota, alertas, manutenção e auditoria
@@ -635,3 +680,9 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 ## 📋 Licença
 
 <img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://github.com/agodoi/template">MODELO GIT FIAP</a> por <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://fiap.com.br">Fiap</a> está licenciado sobre <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International</a>.</p>
+
+### Análise de sentimento
+
+A página tem o título **o que achou dessa aplicacao ?** e permite classificar textos em **Português ou Inglês** como **BOM/RUIM**, com as probabilidades das BiLSTMs PyTorch do notebook RNN. Ao final, o gráfico mostra a probabilidade positiva após cada palavra. Os pesos B2W e IMDB estão em `src/modelo/feedback_bilstm.pt` e `src/modelo/feedback_bilstm_en.pt`; o notebook adaptado é `src/modelo/feedback_projeto.ipynb`. Consulte [execução e modelos](document/feedback_projeto.md).
+
+A análise também inclui **Raio-X das palavras**, com destaque da influência de cada termo por remoção individual, e **Diagnóstico técnico**, com modelo, versão, métricas de origem, probabilidade, vocabulário e dispositivo. O gráfico de leitura progressiva permanece ao final.

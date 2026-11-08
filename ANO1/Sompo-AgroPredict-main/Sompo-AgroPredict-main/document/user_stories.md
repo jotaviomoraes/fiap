@@ -1,4 +1,4 @@
-# 📋 User Stories — Sompo AgroPredict
+# 📋 User Stories — AgroPredict
 
 > Documento formal das User Stories da solução, incorporando o feedback da Sprint 1. Ao final, a rastreabilidade de cada critério de aceite no MVP entregue na Sprint 4.
 > Formato: **Como [persona] / Quero [funcionalidade] / Para [valor]**, com critérios de aceite no padrão **Dado / Quando / Então**.
@@ -82,15 +82,15 @@ O gestor acompanha de 5 a 50 máquinas em paralelo. Não pode olhar alerta por a
 
 ---
 
-## US-03 — Analista da Sompo: portfolio risk e bonificação por comportamento
+## US-03 — Analista João: portfolio risk e bonificação por comportamento
 
-**Como** analista de risco / atuária da Sompo
+**Como** analista de risco / atuária
 **Quero** acessar relatórios consolidados de comportamento preventivo por produtor segurado
 **Para** precificar apólices com justiça, oferecer bonificações por comportamento e reduzir a sinistralidade da carteira
 
 ### Contexto
 
-A Sompo precisa transformar o seguro de **reativo** (paga sinistro) em **preventivo** (precifica com base em comportamento real). Esse relatório alimenta tanto o modelo de bonificação na renovação quanto a análise forense de sinistros.
+A AgroPredict precisa transformar o seguro de **reativo** (paga sinistro) em **preventivo** (precifica com base em comportamento real). Esse relatório alimenta tanto o modelo de bonificação na renovação quanto a análise forense de sinistros.
 
 ### Critérios de aceite
 
@@ -146,7 +146,7 @@ em [`../assets/`](../assets/) e as evidências geradas por script em [`evidencia
 | CA-02.3 — Drilldown | ✅ Implementado | Seleção do equipamento → série do score, **score médio por hora do dia** (padrões temporais) e histórico detalhado | Print `15_frota_ranking.png` (drilldown e score por hora) |
 | CA-02.4 — Fatores de risco | ✅ Implementado | Aba **Fatores de risco**: cenários (recomendação emitida) e variáveis acima do limiar nas predições MÉDIO/ALTO; tendências por região, tipo de operação e equipamento | Prints `16_frota_tendencias.png` e `17_frota_fatores.png`; `test_relatorios.py` (`test_tendencia_por_regiao_e_por_tipo_de_operacao`) |
 
-### US-03 — Analista Sompo
+### US-03 — Analista João
 
 | Critério | Situação | Onde está | Evidência |
 |---|---|---|---|
@@ -159,7 +159,7 @@ em [`../assets/`](../assets/) e as evidências geradas por script em [`evidencia
 
 | Requisito do briefing | Onde está | Evidência |
 |---|---|---|
-| Código modular, exceções tratadas, fluxo estável | Camada `src/agropredict`; validação de entrada; `ErroProcessamento`; fallback manual de GPS/clima | 78 testes em `resultado_testes.txt` |
+| Código modular, exceções tratadas, fluxo estável | Camada `src/agropredict`; validação de entrada; `ErroProcessamento`; fallback manual de GPS/clima | 87 testes em `resultado_testes.txt` |
 | Tratamento de inconsistências, faltantes e duplicidades | `qualidade.py` (treino); validação + rejeição de duplicatas (produção) | `relatorio_modelo.md` §1; `test_qualidade.py` |
 | Ajuste final do modelo com métricas justificadas | `treinar_modelo.py` | `relatorio_modelo.md` |
 | Integração consistente, sem perda ou corrupção | `validar_integracao.py` | `validacao_integracao.md` |

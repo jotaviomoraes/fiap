@@ -1,5 +1,5 @@
 # =====================================================================
-# Sompo AgroPredict - Challenge Sompo x FIAP - Sprint 4
+# AgroPredict - Challenge FIAP - Sprint 4
 # Arquivo unico de dependencias do projeto.
 #
 # Instalacao (a partir da raiz do repositorio):
@@ -29,7 +29,10 @@ ipykernel>=6.0
 streamlit>=1.30
 
 # --- Banco de dados -------------------------------------------------
+# Oracle Autonomous Database em modo Thin (sem Oracle Instant Client).
 oracledb>=2.0
+# Leitura de config/.env (credenciais fora do código).
+python-dotenv>=1.0
 
 # --- Telemetria em tempo real (GPS + clima) -------------------------
 streamlit-js-eval>=0.1.7

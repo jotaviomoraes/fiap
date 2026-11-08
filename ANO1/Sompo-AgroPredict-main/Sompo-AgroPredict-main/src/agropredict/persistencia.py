@@ -173,10 +173,24 @@ MIGRACOES = [
 
     DROP VIEW IF EXISTS vw_predicoes;
     """ + VIEW_PREDICOES,
+    # 2 — versao da demonstracao e configuracoes persistentes
+    """
+    CREATE TABLE IF NOT EXISTS configuracoes (
+        chave         TEXT PRIMARY KEY,
+        valor         TEXT,
+        atualizado_em TEXT NOT NULL
+    );
+    """,
 ]
 
-# Frota ficticia de demonstracao. Os tres primeiros ids coincidem com o
-# seed de src/sql/schema.sql para a replicacao Oracle opcional.
+# Marca a versao dos dados ficticios. Ao mudar, a demonstracao e regerada
+# removendo SOMENTE as leituras com origem = 'simulador'.
+VERSAO_DEMO = "v2-frota-8"
+
+# Frota ficticia de demonstracao: 8 equipamentos (5 colheitadeiras,
+# 2 tratores e 1 pulverizador), 4 fazendas e 3 regioes. Os seis
+# primeiros ids coincidem com o seed historico para nao quebrar bancos
+# existentes nem os testes automatizados.
 EQUIPAMENTOS_SEED = [
     (1, "COL-01", "Colheitadeira", "CR9.90", "New Holland", 2018, "Fazenda Aurora", "Sorriso - MT"),
     (2, "COL-02", "Colheitadeira", "S780", "John Deere", 2020, "Fazenda Aurora", "Sorriso - MT"),
@@ -184,6 +198,8 @@ EQUIPAMENTOS_SEED = [
     (4, "PUL-01", "Pulverizador", "M4040", "John Deere", 2016, "Fazenda Boa Vista", "Rio Verde - GO"),
     (5, "TRA-02", "Trator", "T7.245", "New Holland", 2009, "Fazenda Santa Clara", "Cascavel - PR"),
     (6, "COL-03", "Colheitadeira", "IDEAL 9T", "Fendt", 2022, "Fazenda Santa Clara", "Cascavel - PR"),
+    (7, "COL-04", "Colheitadeira", "Axial-Flow 250", "Case IH", 2019, "Fazenda Horizonte", "Sorriso - MT"),
+    (8, "COL-05", "Colheitadeira", "CR10.90", "New Holland", 2021, "Fazenda Horizonte", "Sorriso - MT"),
 ]
 
 ACOES_ALERTA = ("RESPEITOU", "IGNOROU")
@@ -194,6 +210,8 @@ def agora_iso() -> str:
 
 
 class RepositorioSQLite:
+    backend = "sqlite"
+
     def __init__(self, caminho: Path | str = DB_PATH):
         self.caminho = Path(caminho)
         self.caminho.parent.mkdir(parents=True, exist_ok=True)
@@ -230,6 +248,28 @@ class RepositorioSQLite:
     def consultar(self, sql: str, params: tuple | list = ()) -> pd.DataFrame:
         with self.conexao() as conn:
             return pd.read_sql_query(sql, conn, params=params)
+
+    def executar(self, sql: str, params: tuple | list = ()) -> int:
+        """Executa um comando de escrita e devolve o numero de linhas afetadas."""
+        with self.conexao() as conn:
+            return conn.execute(sql, params).rowcount
+
+    # ------------------------------------------------------------------
+    # Configuracoes persistentes (marcador da demonstracao)
+    # ------------------------------------------------------------------
+    def obter_configuracao(self, chave: str) -> str | None:
+        with self.conexao() as conn:
+            row = conn.execute("SELECT valor FROM configuracoes WHERE chave = ?", (chave,)).fetchone()
+        return row[0] if row else None
+
+    def definir_configuracao(self, chave: str, valor: str) -> None:
+        with self.conexao() as conn:
+            conn.execute(
+                """INSERT INTO configuracoes (chave, valor, atualizado_em) VALUES (?,?,?)
+                   ON CONFLICT (chave) DO UPDATE SET valor = excluded.valor,
+                                                     atualizado_em = excluded.atualizado_em""",
+                (chave, valor, agora_iso()),
+            )
 
     # ------------------------------------------------------------------
     # Equipamentos

@@ -241,7 +241,7 @@ def main() -> None:
     warnings.filterwarnings("ignore", category=UserWarning)
     inicio = time.time()
     print("=" * 64)
-    print(f"Sompo AgroPredict — treino do modelo {VERSAO}")
+    print(f"AgroPredict — treino do modelo {VERSAO}")
     print("=" * 64)
 
     # 1. Qualidade -------------------------------------------------------

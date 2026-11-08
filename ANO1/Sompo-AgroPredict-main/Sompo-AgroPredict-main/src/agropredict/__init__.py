@@ -1,7 +1,7 @@
 """
 agropredict
 -----------
-Camada de servico do Sompo AgroPredict, independente da interface.
+Camada de servico do AgroPredict, independente da interface.
 
 Fluxo de ponta a ponta:
 

@@ -13,6 +13,10 @@ from agropredict.entrada import STATUS_VALIDOS
 from agropredict.fabrica import Contexto, criar_contexto
 from agropredict.relatorios import Filtros
 from agropredict.seguranca import PERFIS, Sessao
+from i18n import (
+    formato_data_input, formatar_numero, idioma_atual, t, traduzir_dataframe, tr_classe, tr_motivo_override,
+    tr_perfil, tr_status, tr_variavel,
+)
 
 CORES_RISCO = {"BAIXO": "#2C5F2D", "MEDIO": "#E8A33D", "ALTO": "#C8443D"}
 EMOJI_RISCO = {"BAIXO": "🟢", "MEDIO": "🟡", "ALTO": "🔴"}
@@ -37,7 +41,7 @@ def exigir(recurso: str) -> Sessao:
     s = sessao()
     if not s.pode(recurso):
         contexto().auth.registrar_acesso_negado(s, recurso)
-        st.error(f"🚫 O perfil **{PERFIS[s.perfil]}** não tem acesso a esta área.")
+        st.error(t("🚫 O perfil **{perfil}** não tem acesso a esta área.", perfil=tr_perfil(s.perfil)))
         st.stop()
     return s
 
@@ -56,12 +60,15 @@ def barra_filtros(chave: str, dias_padrao: int = 14, com_status: bool = True) ->
     colunas = st.columns([2, 2, 2] if com_status else [2, 2])
     hoje = date.today()
     periodo = colunas[0].date_input(
-        "Período", value=(hoje - timedelta(days=dias_padrao - 1), hoje), key=f"{chave}_periodo",
-        format="DD/MM/YYYY",
+        t("Período"), value=(hoje - timedelta(days=dias_padrao - 1), hoje), key=f"{chave}_periodo",
+        format=formato_data_input(),
     )
-    sel_regioes = colunas[1].multiselect("Região", regioes, key=f"{chave}_regioes", placeholder="Todas")
+    sel_regioes = colunas[1].multiselect(t("Região"), regioes, key=f"{chave}_regioes", placeholder=t("Todas"))
     sel_status = (
-        colunas[2].multiselect("Tipo de operação", list(STATUS_VALIDOS), key=f"{chave}_status", placeholder="Todos")
+        colunas[2].multiselect(
+            t("Tipo de operação"), list(STATUS_VALIDOS), key=f"{chave}_status", placeholder=t("Todos"),
+            format_func=tr_status,
+        )
         if com_status else []
     )
 
@@ -75,7 +82,7 @@ def barra_filtros(chave: str, dias_padrao: int = 14, com_status: bool = True) ->
 
 
 def rotulo_classe(classe: str) -> str:
-    return f"{EMOJI_RISCO.get(classe, '')} {classe}"
+    return f"{EMOJI_RISCO.get(classe, '')} {tr_classe(classe)}"
 
 
 def formatar_hhmm(horas: float) -> str:
@@ -110,16 +117,21 @@ ROTULOS_COLUNAS = {
 }
 
 
+def rotulo_coluna(coluna: str) -> str:
+    return t(ROTULOS_COLUNAS.get(coluna, coluna))
+
+
 def tabela(df: pd.DataFrame, column_config: dict | None = None, **kwargs) -> None:
-    config = {c: st.column_config.Column(ROTULOS_COLUNAS[c]) for c in df.columns if c in ROTULOS_COLUNAS}
+    exibicao = traduzir_dataframe(df)
+    config = {c: st.column_config.Column(rotulo_coluna(c)) for c in exibicao.columns if c in ROTULOS_COLUNAS}
     config.update(column_config or {})
-    st.dataframe(df, width="stretch", hide_index=True, column_config=config, **kwargs)
+    st.dataframe(exibicao, width="stretch", hide_index=True, column_config=config, **kwargs)
 
 
-def botao_csv(df: pd.DataFrame, nome: str, rotulo: str = "⬇️ Exportar CSV") -> None:
+def botao_csv(df: pd.DataFrame, nome: str, rotulo: str | None = None) -> None:
     """Exporta o relatorio exibido (UTF-8 com BOM, abre corretamente no Excel)."""
     st.download_button(
-        rotulo, df.to_csv(index=False).encode("utf-8-sig"),
+        rotulo or t("⬇️ Exportar CSV"), df.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"{nome}_{date.today().isoformat()}.csv", mime="text/csv", key=f"csv_{nome}",
     )
 
@@ -136,14 +148,18 @@ def explicacao_em_texto(explicacao: list[dict], motivo_override: str | None = No
     """Frases legiveis para o operador a partir da explicacao local do modelo."""
     linhas = []
     if motivo_override:
-        linhas.append(f"⚡ **Regra crítica:** {motivo_override} — risco ALTO independente do modelo.")
+        linhas.append(t("⚡ **Regra crítica:** {motivo} — risco ALTO independente do modelo.",
+                        motivo=tr_motivo_override(motivo_override)))
     for c in explicacao:
-        nome, unidade = ROTULO_VARIAVEL.get(c["variavel"], (c["variavel"], ""))
-        linhas.append(
-            f"**{nome}** em {c['valor']:g}{unidade} (típico em operação segura: {c['referencia']:g}{unidade}) "
-            f"→ **+{c['impacto']:.1f}** pontos no score"
-        )
-    return linhas or ["Nenhuma variável eleva o risco de forma relevante nesta leitura."]
+        nome_pt, unidade = ROTULO_VARIAVEL.get(c["variavel"], (c["variavel"], ""))
+        nome = nome_pt if idioma_atual() == "pt" else tr_variavel(c["variavel"])
+        linhas.append(t(
+            "**{nome}** em {valor}{unidade} (típico em operação segura: {referencia}{unidade}) "
+            "→ **+{impacto}** pontos no score",
+            nome=nome, valor=formatar_numero(c["valor"], 2), referencia=formatar_numero(c["referencia"], 2),
+            unidade=unidade, impacto=formatar_numero(c["impacto"], 1),
+        ))
+    return linhas or [t("Nenhuma variável eleva o risco de forma relevante nesta leitura.")]
 
 
 def emitir_sinal(nivel: str) -> None:

@@ -1,5 +1,5 @@
 -- =====================================================================
--- Sompo AgroPredict - Schema do Banco de Dados (Oracle XE)
+-- AgroPredict - Schema do Banco de Dados (Oracle XE)
 -- Versao corrigida para SQL*Plus
 -- =====================================================================
 
@@ -119,7 +119,7 @@ FROM predicoes p
 GROUP BY TRUNC(p.data_hora);
 /
 
--- Mesma frota ficticia do SQLite (src/agropredict/persistencia.py)
+-- Mesma frota ficticia do SQLite (src/agropredict/persistencia.py) - 8 equipamentos
 INSERT INTO equipamentos VALUES (1, 'CR9.90',   'New Holland', 2018, 'Colheitadeira', 'Fazenda Aurora',      'Sorriso - MT',   'S');
 INSERT INTO equipamentos VALUES (2, 'S780',     'John Deere',  2020, 'Colheitadeira', 'Fazenda Aurora',      'Sorriso - MT',   'S');
 INSERT INTO equipamentos VALUES (3, '7240',     'Case IH',     2012, 'Trator',        'Fazenda Boa Vista',   'Rio Verde - GO', 'S');

@@ -1,9 +1,9 @@
 
 <img src="../assets/logo-fiap.png" alt="FIAP - Faculdade de Informática e Admnistração Paulista" border="0" width=30% height=30%>
 
-# AI Project Document — Challenge Sompo × FIAP — Sprint 4 (entrega final)
+# AI Project Document — Challenge AgroPredict × FIAP — Sprint 4 (entrega final)
 
-## Sompo AgroPredict
+## AgroPredict
 
 #### Nomes dos integrantes do grupo
 
@@ -57,7 +57,7 @@ seguradora.
 
 ### 1.1.2. Descrição da Solução Desenvolvida
 
-O **Sompo AgroPredict** é uma plataforma de monitoramento preventivo de risco operacional para
+O **AgroPredict** é uma plataforma de monitoramento preventivo de risco operacional para
 equipamentos agrícolas. A proposta de valor é direta: **em vez de pagar o sinistro depois, calcular
 o risco antes**.
 
@@ -148,7 +148,7 @@ As etapas seguidas na Sprint 4 foram:
 | **Banco principal** | SQLite (`sqlite3`) | Leituras, predições, alertas, rejeições, usuários e logs, com migrações versionadas |
 | **Réplica opcional** | Oracle XE 21c (`oracledb`) | Mesmo resultado gravado em um banco central |
 | **Segurança** | `hashlib` (PBKDF2, SHA-256), `hmac`, `secrets` | Senhas em hash, integridade das leituras, comparação em tempo constante |
-| **Testes** | `unittest`, `unittest.mock` | 78 testes, incluindo respostas simuladas da API de clima |
+| **Testes** | `unittest`, `unittest.mock` | 87 testes, incluindo respostas simuladas da API de clima |
 | **Visualização** | matplotlib | Gráficos de avaliação do modelo gerados pelo treino |
 
 ### Organização do código
@@ -288,7 +288,7 @@ ALTO      [  0     3   315]
 
 | Evidência | Resultado |
 |---|---|
-| Testes automatizados | 78 passando |
+| Testes automatizados | 87 passando |
 | Fonte real (Open-Meteo em 3 regiões) | Respostas válidas em ~0,6 s, gravadas sem alteração e avaliadas |
 | Falhas da fonte (timeout, HTTP 500, JSON inválido etc.) | Todas tratadas sem exceção, com fallback manual |
 | Lote de 514 leituras com problemas injetados | 481 gravadas + 19 inválidas + 14 duplicadas = 514; nenhuma perdida, todas as rejeições registradas |
@@ -398,7 +398,7 @@ As três User Stories, com os doze critérios de aceite e a rastreabilidade fina
 |---|---|
 | [`relatorio_modelo.md`](relatorio_modelo.md) | Qualidade dos dados, comparação de algoritmos, revisão de variáveis, calibração e métricas |
 | [`evidencias/validacao_integracao.md`](evidencias/validacao_integracao.md) | 21 verificações da integração com as fontes de dados |
-| [`evidencias/resultado_testes.txt`](evidencias/resultado_testes.txt) | Saída dos 78 testes automatizados |
+| [`evidencias/resultado_testes.txt`](evidencias/resultado_testes.txt) | Saída dos 87 testes automatizados |
 | `../assets/01..06` | Gráficos da análise exploratória e do modelo da Sprint 2 |
 | `../assets/07..09` | Prints do dashboard da Sprint 3 |
 | `../assets/10..13` | Gráficos de avaliação do modelo final (gerados pelo treino) |

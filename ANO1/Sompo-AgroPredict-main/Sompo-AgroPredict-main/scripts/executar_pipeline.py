@@ -48,7 +48,7 @@ def etapa(titulo: str, comando: list[str], saida_arquivo: Path | None = None, cw
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Pipeline de ponta a ponta do Sompo AgroPredict")
+    parser = argparse.ArgumentParser(description="Pipeline de ponta a ponta do AgroPredict")
     parser.add_argument("--completo", action="store_true", help="regera o dataset e retreina o modelo")
     parser.add_argument("--sem-rede", action="store_true", help="não consulta a Open-Meteo real")
     args = parser.parse_args()

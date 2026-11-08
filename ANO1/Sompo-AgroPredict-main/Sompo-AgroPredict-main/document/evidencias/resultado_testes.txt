@@ -1,6 +1,6 @@
 # 2. Testes automatizados
 # Comando: python.exe -m unittest discover -s tests -t tests -v
-# Executado em 28/09/2026 19:43
+# Executado em 05/11/2026 14:56
 
 [OK] 2 predicoes inseridas
 [OK] 1 alertas registrados (risco MEDIO/ALTO)
@@ -10,12 +10,16 @@
 [AVISO] 1 linhas rejeitadas na validacao
 [OK] 40 predicoes inseridas
 [OK] 22 alertas registrados (risco MEDIO/ALTO)
-test_alertas_oracle_seguem_o_mesmo_criterio (test_consistencia_oracle.ConsistenciaOracleTests.test_alertas_oracle_seguem_o_mesmo_criterio) ... C:\Users\casa\anaconda3\Lib\site-packages\joblib\numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
-As an alternative, you can create a new view using np.reshape (with copy=False if needed).
-  array.shape = self.shape
-ok
+[OK] 34 leituras processadas (entrada -> banco -> modelo -> saida)
+[OK] 2 alertas respondidos; alertas de hoje ficaram PENDENTES
+[OK] 0 entradas recusadas (falha de sensor ou retransmissao), registradas em `rejeicoes`
+[OK] Banco: sqlite — C:\Users\jotav\AppData\Local\Temp\tmp9ljfz8xv\teste.db
+test_alertas_oracle_seguem_o_mesmo_criterio (test_consistencia_oracle.ConsistenciaOracleTests.test_alertas_oracle_seguem_o_mesmo_criterio) ... ok
 test_linha_invalida_e_ignorada_no_lote (test_consistencia_oracle.ConsistenciaOracleTests.test_linha_invalida_e_ignorada_no_lote) ... ok
 test_mesmo_score_no_sqlite_e_no_oracle (test_consistencia_oracle.ConsistenciaOracleTests.test_mesmo_score_no_sqlite_e_no_oracle) ... ok
+test_banco_com_leitura_nao_e_alterado (test_demonstracao.DemonstracaoTests.test_banco_com_leitura_nao_e_alterado) ... ok
+test_banco_vazio_chama_simulador (test_demonstracao.DemonstracaoTests.test_banco_vazio_chama_simulador) ... ok
+test_simulacao_gera_predicoes_e_nao_repete_bootstrap (test_demonstracao.DemonstracaoTests.test_simulacao_gera_predicoes_e_nao_repete_bootstrap) ... ok
 test_aceita_numeros_em_texto (test_entrada.ValidacaoEntradaTests.test_aceita_numeros_em_texto) ... ok
 test_campo_ausente (test_entrada.ValidacaoEntradaTests.test_campo_ausente) ... ok
 test_fora_da_faixa_fisica (test_entrada.ValidacaoEntradaTests.test_fora_da_faixa_fisica) ... ok
@@ -32,14 +36,17 @@ test_haversine (test_fontes.VelocidadeGpsTests.test_haversine) ... ok
 test_leituras_incoerentes_sao_descartadas (test_fontes.VelocidadeGpsTests.test_leituras_incoerentes_sao_descartadas) ... ok
 test_velocidade_calculada_entre_dois_pontos (test_fontes.VelocidadeGpsTests.test_velocidade_calculada_entre_dois_pontos) ... ok
 test_velocidade_do_chip (test_fontes.VelocidadeGpsTests.test_velocidade_do_chip) ... ok
+test_catalogo_nao_tem_traducao_vazia (test_i18n.CatalogoTests.test_catalogo_nao_tem_traducao_vazia) ... ok
+test_catalogo_sem_chaves_duplicadas (test_i18n.CatalogoTests.test_catalogo_sem_chaves_duplicadas) ... ok
+test_todo_texto_de_tela_tem_en_e_es (test_i18n.CatalogoTests.test_todo_texto_de_tela_tem_en_e_es) ... ok
+test_formatacao_de_numero_por_idioma (test_i18n.TraducaoTests.test_formatacao_de_numero_por_idioma) ... ok
+test_texto_sem_traducao_cai_para_portugues (test_i18n.TraducaoTests.test_texto_sem_traducao_cai_para_portugues) ... ok
+test_traduz_texto_e_interpola (test_i18n.TraducaoTests.test_traduz_texto_e_interpola) ... ok
 test_banco_da_sprint_3_e_atualizado_sem_perder_dados (test_modelo.MigracaoTests.test_banco_da_sprint_3_e_atualizado_sem_perder_dados) ... ok
 test_arquivo_corrompido (test_modelo.ModeloFinalTests.test_arquivo_corrompido) ... ok
 test_explicacao_aponta_as_variaveis_de_risco (test_modelo.ModeloFinalTests.test_explicacao_aponta_as_variaveis_de_risco) ... ok
 test_leitura_segura_nao_tem_contribuicoes_relevantes (test_modelo.ModeloFinalTests.test_leitura_segura_nao_tem_contribuicoes_relevantes) ... ok
-test_modelo_legado_sem_metadados_continua_funcionando (test_modelo.ModeloFinalTests.test_modelo_legado_sem_metadados_continua_funcionando) ... C:\Users\casa\anaconda3\Lib\site-packages\joblib\numpy_pickle.py:207: DeprecationWarning: Setting the shape on a NumPy array has been deprecated in NumPy 2.5.
-As an alternative, you can create a new view using np.reshape (with copy=False if needed).
-  array.shape = self.shape
-ok
+test_modelo_legado_sem_metadados_continua_funcionando (test_modelo.ModeloFinalTests.test_modelo_legado_sem_metadados_continua_funcionando) ... ok
 test_probabilidades_somam_um_e_classe_e_a_mais_provavel (test_modelo.ModeloFinalTests.test_probabilidades_somam_um_e_classe_e_a_mais_provavel) ... ok
 test_versao_e_metadados_vem_do_treino (test_modelo.ModeloFinalTests.test_versao_e_metadados_vem_do_treino) ... ok
 test_colunas_obrigatorias (test_qualidade.LimpezaTests.test_colunas_obrigatorias) ... ok
@@ -81,7 +88,7 @@ test_salt_diferente_a_cada_hash (test_seguranca.SenhaTests.test_salt_diferente_a
 test_senha_curta_e_rejeitada (test_seguranca.SenhaTests.test_senha_curta_e_rejeitada) ... ok
 test_alteracao_indevida_no_banco_e_detectada (test_servico.FluxoPontaAPontaTests.test_alteracao_indevida_no_banco_e_detectada) ... Falha ao processar leitura=1
 Traceback (most recent call last):
-  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\servico.py", line 115, in processar_leitura
+  File "C:\Users\jotav\Documents\FIAP\ANO1\Sompo-AgroPredict-main\Sompo-AgroPredict-main\src\agropredict\servico.py", line 115, in processar_leitura
     raise ErroProcessamento("integridade violada: a leitura foi alterada depois de gravada")
 agropredict.servico.ErroProcessamento: integridade violada: a leitura foi alterada depois de gravada
 ok
@@ -94,9 +101,9 @@ test_equipamento_inexistente_e_rejeitado (test_servico.FluxoPontaAPontaTests.tes
 ok
 test_leitura_corrompida_no_banco_fica_marcada_com_erro (test_servico.FluxoPontaAPontaTests.test_leitura_corrompida_no_banco_fica_marcada_com_erro) ... Falha ao processar leitura=1
 Traceback (most recent call last):
-  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\servico.py", line 111, in processar_leitura
+  File "C:\Users\jotav\Documents\FIAP\ANO1\Sompo-AgroPredict-main\Sompo-AgroPredict-main\src\agropredict\servico.py", line 111, in processar_leitura
     leitura = Leitura.de_dict({campo: registro[campo] for campo in FEATURES})
-  File "C:\Users\casa\Desktop\FIAP\Fase 5\somposprint3\src\agropredict\entrada.py", line 91, in de_dict
+  File "C:\Users\jotav\Documents\FIAP\ANO1\Sompo-AgroPredict-main\Sompo-AgroPredict-main\src\agropredict\entrada.py", line 91, in de_dict
     raise LeituraInvalida(problemas)
 agropredict.entrada.LeituraInvalida: Leitura invalida: velocidade=999.0 fora da faixa [0.0, 80.0]
 ok
@@ -113,6 +120,6 @@ test_risco_baixo_nao_gera_alerta (test_servico.FluxoPontaAPontaTests.test_risco_
 test_score_gravado_e_o_risco_esperado (test_servico.FluxoPontaAPontaTests.test_score_gravado_e_o_risco_esperado) ... ok
 
 ----------------------------------------------------------------------
-Ran 78 tests in 26.956s
+Ran 87 tests in 15.662s
 
 OK

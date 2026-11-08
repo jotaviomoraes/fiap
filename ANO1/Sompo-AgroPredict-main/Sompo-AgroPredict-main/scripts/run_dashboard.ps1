@@ -1,5 +1,5 @@
 # =====================================================================
-# Sompo AgroPredict - inicializacao do dashboard (Windows / PowerShell)
+# AgroPredict - inicializacao do dashboard (Windows / PowerShell)
 # ---------------------------------------------------------------------
 # Uso, a partir da raiz do repositorio:
 #     .\scripts\run_dashboard.ps1
@@ -16,5 +16,14 @@ if (-not (Test-Path $app)) {
     exit 1
 }
 
-Write-Host "Iniciando Sompo AgroPredict em http://localhost:8501 ..."
-streamlit run $app
+Write-Host "Iniciando AgroPredict em http://localhost:8501 ..."
+$pythonDashboard = "python"
+$pythonAtivo = if ($env:VIRTUAL_ENV) { Join-Path $env:VIRTUAL_ENV "Scripts\python.exe" } else { $null }
+$ano1Dashboard = Split-Path -Parent (Split-Path -Parent $raiz)
+$pythonCudaDashboard = Join-Path $ano1Dashboard "FASE7\.venv\Scripts\python.exe"
+if ($pythonAtivo -and (Test-Path -LiteralPath $pythonAtivo)) {
+    $pythonDashboard = $pythonAtivo
+} elseif (Test-Path -LiteralPath $pythonCudaDashboard) {
+    $pythonDashboard = $pythonCudaDashboard
+}
+& $pythonDashboard -m streamlit run $app

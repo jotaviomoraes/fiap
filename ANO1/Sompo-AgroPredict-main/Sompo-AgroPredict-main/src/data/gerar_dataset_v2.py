@@ -1,7 +1,7 @@
 """
 gerar_dataset_v2.py
 -------------------
-Geracao do dataset simulado v2 do Sompo AgroPredict (Sprint 2).
+Geracao do dataset simulado v2 do AgroPredict (Sprint 2).
 
 Diferencas em relacao a v1 (Sprint 1):
 - Volume: 1000 linhas (anteriormente ~50)

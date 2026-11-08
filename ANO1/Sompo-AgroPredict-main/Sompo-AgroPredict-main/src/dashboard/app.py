@@ -1,6 +1,6 @@
 """
-app.py - Dashboard Sompo AgroPredict
--------------------------------------
+app.py - Dashboard AgroPredict
+------------------------------
 Camada de interface. Autentica o usuario, descobre o perfil e monta a
 navegacao apenas com as paginas que esse perfil pode ver. Toda regra de
 negocio, persistencia e calculo de risco vive em `src/agropredict`.
@@ -22,13 +22,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agropredict.modelo import ModeloIndisponivel  # noqa: E402
 from agropredict.seguranca import PERFIS, SenhaFraca  # noqa: E402
+from i18n import idioma_atual, seletor_idioma, t, tr_perfil  # noqa: E402
 from ui_comum import contexto  # noqa: E402
 from scripts.simular_frota import popular_demonstracao  # noqa: E402
 
-from paginas import alertas, auditoria, frota, manutencao, operacao  # noqa: E402
+from paginas import alertas, auditoria, feedback, frota, manutencao, operacao  # noqa: E402
 
 st.set_page_config(
-    page_title="Sompo AgroPredict",
+    page_title="AgroPredict",
     page_icon="🌾",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -40,7 +41,8 @@ PAGINAS = [
     ("frota", frota.render, "Frota e tendências", "🚜", "frota"),
     ("alertas", alertas.render, "Alertas", "🚨", "alertas"),
     ("manutencao", manutencao.render, "Manutenção", "🔧", "manutencao"),
-    ("auditoria", auditoria.render, "Auditoria Sompo", "🔎", "auditoria"),
+    ("auditoria", auditoria.render, "Auditoria de risco", "🔎", "auditoria"),
+    ("feedback", feedback.render, "Análise de sentimento", "💬", "feedback"),
 ]
 
 
@@ -69,63 +71,67 @@ def carregar_contexto():
     except ModeloIndisponivel as exc:
         st.error(f"❌ {exc}")
     except SenhaFraca as exc:
-        st.error(f"❌ APP_PASSWORD inválida: {exc}")
+        st.error(t("❌ APP_PASSWORD inválida: {exc}", exc=exc))
     except ValueError as exc:
-        st.error(f"❌ Configuração inválida: {exc}")
+        st.error(t("❌ Configuração inválida: {exc}", exc=exc))
     except RuntimeError as exc:
-        st.error(f"❌ Não foi possível preparar a demonstração: {exc}")
+        st.error(t("❌ Não foi possível preparar a demonstração: {exc}", exc=exc))
     st.stop()
 
 
 def tela_login(ctx) -> None:
-    st.title("🔐 Acesso ao Sompo AgroPredict")
+    st.title(t("🔐 Acesso ao AgroPredict"))
 
     if ctx.repo.listar_usuarios().empty:
-        st.warning("Nenhum usuário cadastrado. Crie um usuário antes de entrar:")
+        st.warning(t("Nenhum usuário cadastrado. Crie um usuário antes de entrar:"))
         st.code(
             "python scripts/gerenciar_usuarios.py criar --usuario gestor1 --perfil gestor",
             language="bash",
         )
-        st.caption(f"Perfis disponíveis: {', '.join(PERFIS)}")
+        st.caption(t("Perfis disponíveis: {perfis}", perfis=", ".join(tr_perfil(p) for p in PERFIS)))
         st.stop()
 
     with st.form("form_login"):
-        usuario = st.text_input("Usuário")
-        senha = st.text_input("Senha", type="password")
-        enviar = st.form_submit_button("Entrar", type="primary")
+        usuario = st.text_input(t("Usuário"))
+        senha = st.text_input(t("Senha"), type="password")
+        enviar = st.form_submit_button(t("Entrar"), type="primary")
 
     if enviar:
         if ctx.auth.bloqueado(usuario.strip()):
             ctx.auth.autenticar(usuario, senha)  # registra a tentativa bloqueada
-            st.error("Usuário temporariamente bloqueado por excesso de tentativas. Aguarde 15 minutos.")
+            st.error(t("Usuário temporariamente bloqueado por excesso de tentativas. Aguarde 15 minutos."))
             st.stop()
         sessao = ctx.auth.autenticar(usuario, senha)
         if sessao:
             st.session_state["sessao"] = sessao
             st.rerun()
-        st.error("Usuário ou senha inválidos.")
+        st.error(t("Usuário ou senha inválidos."))
     st.stop()
 
 
 def main() -> None:
+    seletor_idioma()
     ctx = carregar_contexto()
     sessao = st.session_state.get("sessao")
     if sessao is None:
         tela_login(ctx)
         return
 
+    if getattr(ctx, "backend", "sqlite") == "sqlite" and getattr(ctx, "aviso", None):
+        st.warning(t("⚠️ Oracle indisponível — usando SQLite como fallback nesta sessão."))
+
     with st.sidebar:
         if os.getenv("APP_DEMO", "true").lower() in {"true", "1", "sim"}:
-            st.caption("🧪 Demonstração com dados fictícios. Não usar para decisões reais.")
-        st.markdown(f"**👤 {sessao.nome or sessao.usuario}**  \n{PERFIS[sessao.perfil]}")
-        if st.button("Sair", key="logout"):
+            st.caption(t("🧪 Demonstração com dados fictícios. Não usar para decisões reais."))
+        st.markdown(f"**👤 {sessao.nome or sessao.usuario}**  \n{tr_perfil(sessao.perfil)}")
+        if st.button(t("Sair"), key="logout"):
             ctx.auth.registrar_logout(sessao)
             st.session_state.clear()
             st.rerun()
         st.markdown("---")
 
     paginas = [
-        st.Page(funcao, title=titulo, icon=icone, url_path=url)
+        st.Page(funcao, title=t(titulo), icon=icone, url_path=url)
         for recurso, funcao, titulo, icone, url in PAGINAS
         if sessao.pode(recurso)
     ]
