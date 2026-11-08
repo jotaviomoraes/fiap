@@ -1,0 +1,25 @@
+{
+  "formato": 1,
+  "idioma": "pt",
+  "versao": "bilstm-b2w-pt-v1",
+  "config": {
+    "vocab_size": 20000,
+    "max_len": 120,
+    "emb_dim": 64,
+    "hidden": 32,
+    "p_drop": 0.3
+  },
+  "metricas": {
+    "acuracia": 0.9235555555555556,
+    "acuracia_balanceada": 0.9354951297484685,
+    "f1_macro": 0.9124294910320558,
+    "baseline_majoritaria": 0.706,
+    "treino": 21000,
+    "validacao": 4500,
+    "teste": 4500
+  },
+  "fonte": "B2W-Reviews01 / FASE7/RNN",
+  "criado_em": "2026-11-05T18:57:05.452936+00:00",
+  "epocas": 3,
+  "dominio": "Avaliações de produtos; sem validação em feedbacks AgroPredict"
+}

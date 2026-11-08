@@ -1,0 +1,235 @@
+ → alerta #{id}
+### Contexto
+### Probabilidades
+### Variáveis ambientais
+### Variáveis operacionais
+### {emoji} Predição #{id} · {classe} · score {score}
+### 📍 Status da telemetria
+### 🚜 Equipamento
+% ALTO
+% BAIXO
+% MÉDIO
+% manual
+**Alerta:** nível {nivel} · categoria {categoria} · ação **{acao}** por {usuario} em {data}
+**Critério de prioridade:** 🔴 ALTA com {n}+ alertas mecânicos no período ou qualquer alerta mecânico ALTO · 🟡 MÉDIA com 1–2 alertas mecânicos · 🟢 BAIXA sem alertas mecânicos. Alerta mecânico = idade da máquina > 10 anos ou horas de operação > 8 h como fator dominante.
+**Dados informados manualmente, por fonte**
+**Decisão automatizada**
+**Entradas e fonte de cada dado**
+**Entradas recusadas (rastreáveis)**
+**Por que esse risco? (explicação local do modelo)**
+**Ranking de equipamentos por score médio** (maior risco primeiro)
+**{nome}** em {valor}{unidade} (típico em operação segura: {referencia}{unidade}) → **+{impacto}** pontos no score
+**🔎 Drilldown por equipamento**
+- **Classe final MÉDIO** → alerta nível 🟡 MÉDIO; **classe final ALTO** → alerta nível 🔴 ALTO.
+- A classe final é a do modelo, **exceto** quando alguma variável atinge o limite máximo: nesse caso o override força ALTO e score 100.
+- A **categoria** é a da variável dominante (no máximo, senão em alerta): climática, operacional ou mecânica — alertas mecânicos vão para o técnico de manutenção.
+Aderência
+Aderência (%)
+Aderência = alertas respeitados ÷ alertas respondidos (pendentes não entram no cálculo).
+Agrupar por
+Aguardando permissão de localização do navegador…
+Ainda depende de mapa GIS/satélite por talhão — não coberto pelo GPS do celular.
+Alerta (>)
+Alerta pendente
+Alertas emitidos
+Alertas mecânicos
+Alertas mecânicos por equipamento no período
+Ação tomada
+Categoria
+Cenários de risco (recomendação emitida) em predições MÉDIO/ALTO
+Chuva 24h
+Chuva 24h (auto)
+Chuva 24h (mm)
+Classe do modelo
+Classe final
+Clima: Open-Meteo · atualizado agora
+Data do sinistro
+Declividade
+Declividade (%)
+Desative para digitar tudo manualmente (modo demo/offline).
+Distribuição: 🟢 BAIXO {baixo} · 🟡 MÉDIO {medio} · 🔴 ALTO {alto}
+Entrar
+Equipamento
+Equipamento em operação
+Equipamentos
+Este alerta já havia sido respondido.
+Exibindo somente os alertas das suas operações.
+Falha na API de clima: {erro}
+Fonte
+GPS: {lat}, {lon} (±{acc}m) · leitura #{ciclo}
+Hora do dia
+Hora do sinistro
+Horas de operação
+Horas de operação (acumuladas)
+Horas de operação (auto)
+Horas operação
+ID da predição (padrão: a mais recente)
+Idade da máquina
+Idade da máquina (anos)
+Idade da máquina (cadastro)
+Idade máquina
+Idioma
+Ignorei
+Impacto = quanto o score cairia se a variável estivesse no valor típico de uma operação segura. Calculado para esta leitura, pelo próprio modelo.
+Importância global por permutação do modelo {versao}: quanto o F1 cai quando a variável é embaralhada. Para a explicação de uma leitura específica, veja **Por que esse risco?** acima.
+Integridade da leitura
+Integridade: {com_hash} de {total} leituras com hash SHA-256 · {sem_predicao} leitura(s) processada(s) sem predição (esperado: 0).
+Item
+Janela anterior (h)
+Leituras recebidas
+Marque se o sensor correspondente não conectou hoje.
+Modelo {versao} · {hash}
+Modo manual — sem captura em tempo real.
+Máximo / override (≥)
+Nenhum alerta aguardando resposta.
+Nenhum alerta no período.
+Nenhum alerta para os filtros selecionados.
+Nenhum usuário cadastrado. Crie um usuário antes de entrar:
+Nenhuma entrada recusada no período.
+Nenhuma predição MÉDIO/ALTO no período.
+Nenhuma predição desse equipamento na janela informada.
+Nenhuma predição no período selecionado.
+Nenhuma predição no período.
+Nenhuma predição no período/filtros selecionados. Para popular a demonstração: `python scripts/simular_frota.py`.
+Nenhuma predição registrada ainda.
+Nenhuma predição registrada para este equipamento ainda.
+Nenhuma variável eleva o risco de forma relevante nesta leitura.
+Nível
+O sistema havia alertado o operador antes do horário informado.
+Observação (opcional)
+Ocorrências
+Operação
+Operações avaliadas
+Override de regra crítica
+P(MÉDIO)
+Perfis disponíveis: {perfis}
+Período
+Predição não encontrada.
+Predições na janela
+Prioridade
+Prévia — ainda não gravada. Use **💾 Registrar leitura** na barra lateral.
+Recomendação
+Registrar resposta a um alerta
+Região
+Rejeitadas (duplicadas)
+Rejeitadas (inválidas)
+Replicado no Oracle
+Respeitei
+Resposta registrada no alerta #{id}.
+Sair
+Salvar resposta
+Score
+Score (0–100)
+Score (risco esperado)
+Score = 0·P(BAIXO) + 50·P(MÉDIO) + 100·P(ALTO); override de regra crítica força ALTO e score 100.
+Score de 0 a 100 por produtor segurado (fazenda): {aderencia}% aderência aos alertas + {baixo}% operações em risco BAIXO + {tendencia}% tendência do score no período (50 = estável). Exige {minimo}+ predições. Faixas: {faixas}.
+Score de cada leitura ao longo do período
+Score de comportamento
+Score máx.
+Score máximo
+Score médio
+Score médio (0–100)
+Score médio diário por {dimensao}
+Score médio por hora do dia — padrões temporais
+Sem dados no período.
+Senha
+Sinal curto ao entrar em MÉDIO; sinal repetido e vibração em ALTO.
+Situação
+Temperatura
+Temperatura (auto)
+Temperatura (°C)
+Temperatura / Chuva
+Tendência
+Tipo
+Tipo de operação
+Todas
+Todos
+Umidade do solo
+Umidade do solo (%)
+Umidade do solo (auto)
+Use **Substituir algum campo manualmente** na barra lateral para corrigir o dado.
+Uso sugerido: bonificação na renovação da apólice para faixas Excelente/Bom e plano de ação preventiva para Atenção/Crítico.
+Usuário
+Usuário ou senha inválidos.
+Usuário temporariamente bloqueado por excesso de tentativas. Aguarde 15 minutos.
+Valor
+Variáveis acima do limiar de alerta nessas predições
+Variáveis em alerta
+Variável
+Velocidade
+Velocidade (auto)
+Velocidade (km/h)
+Versão do modelo
+fabricação {ano}
+não
+sem hash (leitura anterior à Sprint 4)
+sim
+{data} · {equipamento} ({regiao}) · operador {usuario} · origem {origem} · leitura #{leitura}
+{emoji} Alertas pendentes deste equipamento
+{idade} anos
+{n} alerta(s)
+{pct}% das operações
+Última gravação: leitura #{leitura} → predição #{predicao}. Exibindo prévia da leitura atual.
+Últimos alertas mecânicos
+ℹ️ Leitura idêntica à #{id} já registrada — não foi gravada de novo.
+ℹ️ Oracle não configurado ou indisponível. O SQLite continua registrando tudo.
+≈ {hora}
+⏳ Aguardando 2ª leitura de GPS para calcular velocidade…
+⏳ Alertas pendentes
+⏳ Pendentes
+⏳ Pendentes / ❌ erro
+⚠️ Alerta
+⚠️ Oracle indisponível — usando SQLite como fallback nesta sessão.
+⚠️ {n} variável(is) em alerta: {variaveis}
+⚡ **Override ativado:** {motivo}
+⚡ **Regra crítica:** {motivo} — risco ALTO independente do modelo.
+✅ Banco principal: Oracle. {n} predições recentes.
+✅ Conectado ao Oracle. {n} predições recentes.
+✅ OK
+✅ Processadas
+✅ hash SHA-256 confere
+✍️ Substituir algum campo manualmente
+❌ APP_PASSWORD inválida: {exc}
+❌ Alertas ignorados
+❌ Configuração inválida: {exc}
+❌ Falha ao registrar a leitura: {erro}
+❌ Leitura rejeitada pela validação de entrada — nada foi gravado.
+❌ Não foi possível preparar a demonstração: {exc}
+❌ hash não confere
+❌ leitura inválida no banco
+❓ Por que esse risco?
+⬇️ Exportar CSV
+⬇️ Exportar resumo (CSV)
+⬇️ Exportar série diária (CSV)
+🌾 AgroPredict — Operação em tempo real
+🏅 Comportamento do produtor
+🏆 Ranking e drilldown
+💾 Leitura #{leitura} → predição #{predicao}{extra} gravadas no banco.
+💾 Registrar leitura
+💾 SQLite (fallback local)
+📅 Últimas predições deste equipamento
+📈 Tendências
+📊 Detalhes da operação avaliada
+📐 Critérios de alerta (como o sistema decide)
+📡 Usar GPS + clima em tempo real
+🔄 Reiniciar contador de horas
+🔊 Alerta sonoro e vibração
+🔍 Quais variáveis mais influenciam o modelo?
+🔎 Auditoria de risco
+🔐 Acesso ao AgroPredict
+🔐 Log de acessos
+🔧 Manutenção preventiva
+🔴 ALTO
+🔴 MAX
+🔴 Risco ALTO
+🕵️ Análise forense
+🗄️ Oracle (réplica opcional)
+🚜 Frota e tendências de risco
+🚨 Alertas
+🚨 Esta leitura gera alerta **{classe}** (categoria {categoria}).
+🚫 O perfil **{perfil}** não tem acesso a esta área.
+🤝 Aderência aos alertas
+🧪 Demonstração com dados fictícios. Não usar para decisões reais.
+🧪 Qualidade da coleta
+🧭 Fatores de risco
+🧾 Auditoria de predição

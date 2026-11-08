@@ -1,0 +1,24 @@
+{
+  "formato": 1,
+  "idioma": "en",
+  "versao": "bilstm-imdb-en-v1",
+  "config": {
+    "vocab_size": 10000,
+    "max_len": 200,
+    "emb_dim": 64,
+    "hidden": 32,
+    "p_drop": 0.3
+  },
+  "metricas": {
+    "acuracia": 0.85048,
+    "acuracia_balanceada": 0.85048,
+    "f1_macro": 0.8501088609058733,
+    "treino": 22500,
+    "validacao": 2500,
+    "teste": 25000
+  },
+  "fonte": "IMDB / FASE7/RNN",
+  "criado_em": "2026-11-05T21:37:20.494479+00:00",
+  "epocas": 3,
+  "dominio": "Avaliações de filmes; sem validação específica no AgroPredict"
+}

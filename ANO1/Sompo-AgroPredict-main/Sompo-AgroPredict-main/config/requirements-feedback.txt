@@ -1,0 +1,3 @@
+﻿# Inclui as dependências do dashboard. Instale a build CUDA antes deste arquivo.
+-r requirements.txt
+torch>=2.9
