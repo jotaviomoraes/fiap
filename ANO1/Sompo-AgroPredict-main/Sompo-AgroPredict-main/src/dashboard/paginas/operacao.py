@@ -13,6 +13,7 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
+from threadpoolctl import threadpool_limits
 
 from agropredict.clima import buscar_clima_atual
 from agropredict.config import config_oracle
@@ -257,7 +258,12 @@ def render() -> None:
         })
     inicio_previa = time.perf_counter()
     try:
-        _, avaliacao = _avaliar_previa(ctx, dados)
+        # O limite deve valer na thread do Streamlit, inclusive quando o
+        # contexto ainda guarda uma instancia criada antes de um deploy.
+        with threadpool_limits(limits=1):
+            if diagnostico:
+                st.json({"threads_durante_previsao": [p["num_threads"] for p in threadpool_info()]})
+            _, avaliacao = _avaliar_previa(ctx, dados)
     except LeituraInvalida as exc:
         st.error(t("❌ Leitura rejeitada pela validação de entrada — nada foi gravado."))
         for problema in exc.problemas:
