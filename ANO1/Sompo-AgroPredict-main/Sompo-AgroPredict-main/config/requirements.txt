@@ -37,5 +37,4 @@ python-dotenv>=1.0
 
 # --- Telemetria em tempo real (GPS + clima) -------------------------
 streamlit-js-eval>=0.1.7
-streamlit-autorefresh>=1.0.1
 requests>=2.31

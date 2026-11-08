@@ -13,7 +13,6 @@ from datetime import date
 
 import pandas as pd
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 
 from agropredict.clima import buscar_clima_atual
 from agropredict.config import config_oracle
@@ -29,7 +28,7 @@ from ui_comum import (
     rotulo_classe, tabela,
 )
 
-INTERVALO_MIN_GRAVACAO = 10  # segundos — mesmo ritmo do ciclo de telemetria
+INTERVALO_MIN_GRAVACAO = 10  # segundos — limite entre gravacoes, sem agendar atualizacoes
 
 
 def _avaliar_previa(ctx, dados: dict):
@@ -91,8 +90,10 @@ def _sidebar_entradas(ctx):
         t("📡 Usar GPS + clima em tempo real"), value=True,
         help=t("Desative para digitar tudo manualmente (modo demo/offline)."),
     )
-    # O contador do autorefresh varia a key do GPS e forca uma NOVA leitura a cada ciclo.
-    ciclo = st_autorefresh(interval=10_000, key="_refresh_telemetria") if modo_real else 0
+    # Uma nova captura so e solicitada pelo usuario, sem temporizador.
+    if modo_real and st.sidebar.button(t("🔄 Atualizar GPS"), key="atualizar_gps"):
+        st.session_state["_ciclo_gps"] = st.session_state.get("_ciclo_gps", 0) + 1
+    ciclo = st.session_state.get("_ciclo_gps", 0)
 
     with st.sidebar.expander(t("✍️ Substituir algum campo manualmente")):
         st.caption(t("Marque se o sensor correspondente não conectou hoje."))

@@ -33,8 +33,8 @@ def capturar_posicao(ciclo: int | str = 0) -> dict | None:
     travada na primeira posicao para sempre -- e por isso a velocidade
     calculada nunca avancava (sempre so 1 ponto disponivel).
 
-    Passe aqui o contador do st_autorefresh (ou qualquer valor que mude a
-    cada rerun) para forcar uma nova leitura de GPS em cada ciclo.
+    Passe aqui o contador do botao Atualizar GPS para solicitar uma nova
+    leitura somente quando o usuario pedir, sem atualizacao periodica.
 
     Retorna None se o navegador ainda nao respondeu, o usuario negou ou a
     resposta veio sem coordenadas validas.

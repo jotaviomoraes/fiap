@@ -60,6 +60,7 @@ CATALOGO: list[tuple[str, str, str]] = [
     ("### 🚜 Equipamento", "### 🚜 Equipment", "### 🚜 Equipo"),
     ("Equipamento em operação", "Equipment in operation", "Equipo en operación"),
     ("📡 Usar GPS + clima em tempo real", "📡 Use GPS + real-time weather", "📡 Usar GPS + clima en tiempo real"),
+    ("🔄 Atualizar GPS", "🔄 Refresh GPS", "🔄 Actualizar GPS"),
     ("Desative para digitar tudo manualmente (modo demo/offline).",
      "Turn off to enter everything manually (demo/offline mode).",
      "Desactive para introducir todo manualmente (modo demo/offline)."),

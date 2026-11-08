@@ -638,8 +638,8 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 - **Variáveis ainda não automáticas:** declividade (depende de mapa GIS por talhão) e umidade do solo
   (aproximação da Open-Meteo para a camada de 0–1 cm, não um sensor).
 - **Telemetria no navegador:** geolocalização exige HTTPS em produção; `coords.speed` só vem em
-  celulares com GPS ativo e em movimento; o ciclo de 10 s não capta eventos mais rápidos; o contador
-  de horas depende da aba aberta.
+  celulares com GPS ativo e em movimento. Novas capturas são solicitadas pelo botão **Atualizar GPS**;
+  a página não tem atualização periódica. O contador de horas é atualizado nas interações com a tela.
 - **Alerta sonoro e vibração** dependem do navegador: o som pode exigir uma interação prévia com a
   página e a vibração só existe em celulares Android. O alerta visual vale sempre.
 - **Fallback local:** se o Oracle não estiver configurado ou acessível, o SQLite assume na máquina de
