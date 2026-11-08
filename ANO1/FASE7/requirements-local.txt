@@ -1,0 +1,26 @@
+﻿# Instale PyTorch CUDA separadamente conforme README_LOCAL.md.
+numpy>=1.26
+pandas>=2.2
+matplotlib>=3.9
+scipy>=1.13
+scikit-learn>=1.5
+seaborn>=0.13
+beautifulsoup4>=4.12
+lxml>=5
+jupyterlab>=4
+ipykernel>=6
+ipywidgets>=8
+nbformat>=5
+librosa>=0.10.2
+soundfile>=0.12
+sounddevice>=0.5
+gTTS>=2.5
+SpeechRecognition>=3.10
+openai-whisper
+jiwer>=3
+noisereduce>=3
+pydub>=0.25
+silero-vad
+gradio>=5,<6
+qrcode[pil]>=7
+imageio-ffmpeg>=0.6

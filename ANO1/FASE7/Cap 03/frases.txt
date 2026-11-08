@@ -1,0 +1,4 @@
+pt; Como você está?
+en; How are you?
+fr; Comment vas-tu?
+it; Come stai?

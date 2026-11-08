@@ -1,0 +1,3 @@
+﻿# RNN usa as mesmas dependências dos notebooks locais.
+-r ../requirements-local.txt
+# Instale torch com CUDA separadamente: consulte ../README_LOCAL.md.
