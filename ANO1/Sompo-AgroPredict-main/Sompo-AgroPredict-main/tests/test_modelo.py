@@ -7,8 +7,10 @@ import unittest
 from pathlib import Path
 
 import apoio
+import numpy as np
+import pandas as pd
 
-from agropredict.entrada import Leitura
+from agropredict.entrada import FEATURES, Leitura
 from agropredict.modelo import ModeloIndisponivel, ModeloRisco
 from agropredict.persistencia import MIGRACOES, SCHEMA, RepositorioSQLite
 from agropredict.servico import ServicoAvaliacao
@@ -17,6 +19,14 @@ META = apoio.RAIZ / "src" / "modelo" / "modelo_meta.json"
 
 
 class ModeloFinalTests(unittest.TestCase):
+    def test_limite_de_threads_preserva_probabilidades(self):
+        modelo = apoio.modelo()
+        lote = pd.DataFrame([apoio.LEITURA_SEGURA, apoio.LEITURA_CRITICA])
+        esperado = modelo.pipeline.predict_proba(lote[FEATURES])
+        probabilidades, _ = modelo._scores(lote)
+        obtido = [[p[c] for c in modelo.classes] for p in probabilidades]
+        np.testing.assert_allclose(obtido, esperado, rtol=1e-12, atol=1e-12)
+
     def test_versao_e_metadados_vem_do_treino(self):
         meta = json.loads(META.read_text(encoding="utf-8"))
         modelo = apoio.modelo()

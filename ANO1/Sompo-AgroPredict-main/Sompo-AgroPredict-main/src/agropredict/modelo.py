@@ -22,6 +22,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+from threadpoolctl import threadpool_limits
 
 from .config import MODELO_META_PATH, MODELO_PATH, VERSAO_MODELO
 from .entrada import FEATURES, FEATURES_NUMERICAS, Leitura
@@ -82,7 +83,10 @@ class ModeloRisco:
         return cls(pipeline, meta.get("versao", VERSAO_MODELO), hashlib.sha256(conteudo).hexdigest()[:12], meta)
 
     def _scores(self, lote: pd.DataFrame) -> tuple[list[dict[str, float]], list[float]]:
-        probas = self.pipeline.predict_proba(lote[FEATURES])
+        # As previsoes usam lotes pequenos. Muitas threads OpenMP podem
+        # disputar a cota de CPU do Streamlit Cloud e atrasar cada rerun.
+        with threadpool_limits(limits=1, user_api="openmp"):
+            probas = self.pipeline.predict_proba(lote[FEATURES])
         linhas = [{c: float(p) for c, p in zip(self.classes, linha)} for linha in probas]
         scores = [sum(PESO_RISCO[c] * p for c, p in linha.items()) for linha in linhas]
         return linhas, scores

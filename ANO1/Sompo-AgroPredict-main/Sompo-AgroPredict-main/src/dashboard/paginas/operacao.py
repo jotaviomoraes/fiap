@@ -17,7 +17,7 @@ from streamlit_autorefresh import st_autorefresh
 
 from agropredict.clima import buscar_clima_atual
 from agropredict.config import config_oracle
-from agropredict.entrada import LeituraInvalida, STATUS_VALIDOS
+from agropredict.entrada import Leitura, LeituraInvalida, STATUS_VALIDOS
 from agropredict.oracle import configurado as oracle_configurado
 from agropredict.regras import ALERTA, MAXIMO
 from agropredict.relatorios import Filtros
@@ -30,6 +30,17 @@ from ui_comum import (
 )
 
 INTERVALO_MIN_GRAVACAO = 10  # segundos — mesmo ritmo do ciclo de telemetria
+
+
+def _avaliar_previa(ctx, dados: dict):
+    """Reutiliza a ultima previa da sessao enquanto leitura e modelo forem iguais."""
+    leitura = Leitura.de_dict(dados)
+    chave = (ctx.servico.modelo, leitura)
+    previa = st.session_state.get("_previa_operacao")
+    if previa is None or previa[0] != chave:
+        previa = (chave, ctx.servico.avaliar(leitura))
+        st.session_state["_previa_operacao"] = previa
+    return previa[1]
 
 
 @st.cache_data(ttl=600, show_spinner=False)  # cache de 10 min por coordenada
@@ -234,7 +245,7 @@ def render() -> None:
     # Previa (sem gravar) — mesma funcao de avaliacao usada na gravacao
     # ------------------------------------------------------------------
     try:
-        _, avaliacao = ctx.servico.avaliar(dados)
+        _, avaliacao = _avaliar_previa(ctx, dados)
     except LeituraInvalida as exc:
         st.error(t("❌ Leitura rejeitada pela validação de entrada — nada foi gravado."))
         for problema in exc.problemas:
