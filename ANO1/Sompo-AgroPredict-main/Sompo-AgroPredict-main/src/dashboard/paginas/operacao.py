@@ -245,6 +245,17 @@ def render() -> None:
     # ------------------------------------------------------------------
     # Previa (sem gravar) — mesma funcao de avaliacao usada na gravacao
     # ------------------------------------------------------------------
+    diagnostico = sessao.perfil == "admin" and st.query_params.get("diagnostico") == "1"
+    if diagnostico:
+        from threadpoolctl import threadpool_info
+        from joblib import cpu_count
+        st.json({
+            "etapa": "antes_da_previsao",
+            "limite_threads_na_instancia": "threadpool_limits" in ctx.servico.modelo._scores.__code__.co_names,
+            "cpu_disponivel": cpu_count(),
+            "threadpools": [{"api": p["internal_api"], "threads": p["num_threads"]} for p in threadpool_info()],
+        })
+    inicio_previa = time.perf_counter()
     try:
         _, avaliacao = _avaliar_previa(ctx, dados)
     except LeituraInvalida as exc:
@@ -254,6 +265,9 @@ def render() -> None:
             st.markdown(f"- {tr_motivo_rejeicao(problema)}")
         st.info(t("Use **Substituir algum campo manualmente** na barra lateral para corrigir o dado."))
         st.stop()
+
+    if diagnostico:
+        st.json({"tempo_previsao_segundos": round(time.perf_counter() - inicio_previa, 4)})
 
     # ------------------------------------------------------------------
     # Persistencia: entrada -> banco -> modelo -> saida, pelo servico
