@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import time
 from datetime import date, timedelta
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
 from agropredict.entrada import STATUS_VALIDOS
+from agropredict import modelo as modulo_modelo
+from agropredict.config import MODELO_META_PATH, MODELO_PATH
 from agropredict.fabrica import Contexto, criar_contexto
 from agropredict.relatorios import Filtros
 from agropredict.seguranca import PERFIS, Sessao
@@ -27,9 +30,19 @@ PALETA_CATEGORICA = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#00
 COR_SERIE_UNICA = PALETA_CATEGORICA[0]
 
 
-@st.cache_resource(show_spinner="Carregando modelo e banco…")
-def contexto() -> Contexto:
+@st.cache_resource(show_spinner="Carregando modelo e banco…", max_entries=1)
+def _contexto_cache(versao_modelo: tuple) -> Contexto:
+    """A versao faz parte da chave para nao manter instancias de codigo antigo."""
     return criar_contexto()
+
+
+def contexto() -> Contexto:
+    arquivos = (MODELO_PATH, MODELO_META_PATH)
+    versao = (
+        Path(modulo_modelo.__file__).read_bytes(),
+        tuple((p.stat().st_mtime_ns, p.stat().st_size) if p.is_file() else None for p in arquivos),
+    )
+    return _contexto_cache(versao)
 
 
 def sessao() -> Sessao:
