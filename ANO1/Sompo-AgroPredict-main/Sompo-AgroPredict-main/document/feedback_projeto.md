@@ -19,7 +19,11 @@ Use scripts/run_dashboard.ps1. O notebook adaptado é src/modelo/feedback_projet
 
 Variáveis opcionais: FEEDBACK_MODELO aponta para os pesos portugueses; FEEDBACK_MODELO_EN aponta para os ingleses. Se o modelo selecionado estiver indisponível, a análise é desabilitada sem substituição por outro idioma. Alterar o texto ou idioma limpa o resultado anterior.
 
-O Streamlit carrega os pesos em cache, com CUDA quando disponível e CPU como alternativa. O treino ocorre somente offline. Para reproduzir o inglês: python scripts/treinar_feedback_ingles.py. O script português continua disponível em scripts/treinar_feedback.py. Dependências em config/requirements-feedback.txt.
+O Streamlit guarda em cache apenas carregamentos bem-sucedidos dos pesos, com CUDA quando disponível e CPU como alternativa. Uma falha permite nova tentativa na interação seguinte. A inferência limita as threads na execução da tela para evitar disputa de CPU na hospedagem.
+
+O deploy usa `config/requirements-cloud.txt`, com PyTorch CPU e sem ferramentas de notebooks. O arquivo `requirements.txt` da raiz do repositório FIAP aponta para essa configuração. Para desenvolvimento e treino, use `config/requirements-dev.txt`; quem já utiliza um ambiente CUDA pode manter `config/requirements-feedback.txt`.
+
+O treino ocorre somente offline. Para reproduzir o inglês: python scripts/treinar_feedback_ingles.py. O script português continua disponível em scripts/treinar_feedback.py.
 
 ## Raio-X das palavras e diagnóstico técnico
 

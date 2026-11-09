@@ -14,7 +14,7 @@ import pandas as pd
 import streamlit as st
 
 from agropredict.relatorios import Filtros
-from i18n import formatar_numero, t, tr_recomendacao, tr_status, tr_variavel
+from i18n import formatar_numero, t, tr_recomendacao, tr_variavel
 from ui_comum import COR_SERIE_UNICA, barra_filtros, botao_csv, contexto, cores_para, exigir, tabela
 
 DIMENSOES_ROTULO = {

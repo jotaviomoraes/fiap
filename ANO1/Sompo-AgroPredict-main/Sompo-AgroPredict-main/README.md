@@ -686,3 +686,8 @@ Documento completo, com a rastreabilidade de cada critério de aceite, em
 A página tem o título **o que achou dessa aplicacao ?** e permite classificar textos em **Português ou Inglês** como **BOM/RUIM**, com as probabilidades das BiLSTMs PyTorch do notebook RNN. Ao final, o gráfico mostra a probabilidade positiva após cada palavra. Os pesos B2W e IMDB estão em `src/modelo/feedback_bilstm.pt` e `src/modelo/feedback_bilstm_en.pt`; o notebook adaptado é `src/modelo/feedback_projeto.ipynb`. Consulte [execução e modelos](document/feedback_projeto.md).
 
 A análise também inclui **Raio-X das palavras**, com destaque da influência de cada termo por remoção individual, e **Diagnóstico técnico**, com modelo, versão, métricas de origem, probabilidade, vocabulário e dispositivo. O gráfico de leitura progressiva permanece ao final.
+
+Após entrar, abra **Análise de sentimento** no menu lateral (`/feedback`). O deploy completo usa
+`config/requirements-cloud.txt`, incluindo PyTorch para CPU. Dependências de notebooks e treino
+ficam em `config/requirements-dev.txt`, fora da instalação de produção. A página classifica o texto
+na sessão; não grava comentários nem utiliza o banco legado `feedback.db`.

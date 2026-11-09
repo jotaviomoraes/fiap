@@ -5,10 +5,14 @@ import logging
 import html
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import streamlit as st
 import numpy as np
-from matplotlib.figure import Figure
+from threadpoolctl import threadpool_limits
+
+if TYPE_CHECKING:
+    from matplotlib.figure import Figure
 
 from agropredict.config import RAIZ_PROJETO
 from i18n import t
@@ -17,15 +21,13 @@ from ui_comum import exigir
 
 @st.cache_resource
 def _analisador(caminho: str, modificado: int, idioma: str):
-    try:
-        from agropredict.feedback_modelo import AnalisadorFeedback
-        return AnalisadorFeedback(Path(caminho), idioma)
-    except Exception:
-        logging.getLogger(__name__).exception("Análise de sentimento indisponível")
-        return None
+    from agropredict.feedback_modelo import AnalisadorFeedback
+    return AnalisadorFeedback(Path(caminho), idioma)
 
 
 def grafico_leitura(resultado: dict) -> Figure:
+    from matplotlib.figure import Figure
+
     fig = Figure(figsize=(11, 3.4))
     ax = fig.subplots()
     y = np.asarray(resultado["leitura"])
@@ -90,7 +92,11 @@ def render() -> None:
     nome = "feedback_bilstm.pt" if idioma == "pt" else "feedback_bilstm_en.pt"
     variavel = "FEEDBACK_MODELO" if idioma == "pt" else "FEEDBACK_MODELO_EN"
     caminho = Path(os.getenv(variavel, RAIZ_PROJETO / "src/modelo" / nome))
-    modelo = _analisador(str(caminho), caminho.stat().st_mtime_ns, idioma) if caminho.is_file() else None
+    try:
+        modelo = _analisador(str(caminho), caminho.stat().st_mtime_ns, idioma) if caminho.is_file() else None
+    except Exception:
+        logging.getLogger(__name__).exception("Análise de sentimento indisponível")
+        modelo = None
     texto = st.text_area(t("Texto para analisar"), max_chars=3000, height=140,
                          placeholder=("Ex.: gostei muito do projeto, é excelente e fácil de usar." if idioma == "pt"
                                       else "E.g.: I really liked this application, it is excellent and easy to use."),
@@ -108,7 +114,8 @@ def render() -> None:
             st.warning(t("Digite um texto para analisar."))
         else:
             try:
-                resultado = modelo.classificar(texto)
+                with threadpool_limits(limits=1):
+                    resultado = modelo.classificar(texto)
             except ValueError:
                 st.warning(t("Digite um texto para analisar."))
             except Exception:

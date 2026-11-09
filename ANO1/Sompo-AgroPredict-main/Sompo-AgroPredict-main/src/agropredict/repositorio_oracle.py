@@ -16,7 +16,6 @@ import json
 import logging
 import re
 from contextlib import contextmanager
-from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -191,12 +190,6 @@ def _mascarar_literais(sql: str) -> tuple[str, list[str]]:
         return f"__LIT{len(literais) - 1}__"
 
     return re.sub(r"'(?:''|[^'])*'", troca, sql), literais
-
-
-def _desmascarar(sql: str, literais: list[str]) -> str:
-    for i, valor in enumerate(literais):
-        sql = sql.replace(f"__LIT{i}__", valor)
-    return sql
 
 
 def _fechar_parentese(texto: str, inicio: int) -> int:

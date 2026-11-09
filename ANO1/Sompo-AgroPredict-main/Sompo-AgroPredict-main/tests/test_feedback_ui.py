@@ -1,5 +1,6 @@
 """Classificador Streamlit com os pesos reais da BiLSTM do notebook RNN."""
 import os
+import sys
 import importlib.util
 import tempfile
 import unittest
@@ -9,6 +10,8 @@ from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 
 RAIZ = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RAIZ / "src"))
+sys.path.insert(0, str(RAIZ / "src" / "dashboard"))
 
 
 class FeedbackUITests(unittest.TestCase):
@@ -37,6 +40,20 @@ render()
             self.assertTrue(app.button[0].disabled)
             self.assertTrue(any("indisponível" in s.value for s in app.error))
 
+    @unittest.skipUnless(importlib.util.find_spec("torch"), "Requer o ambiente PyTorch")
+    def test_falha_temporaria_no_carregamento_permite_nova_tentativa(self):
+        from paginas.feedback import _analisador
+        _analisador.clear()
+        self.addCleanup(_analisador.clear)
+        modelo = object()
+        with patch("agropredict.feedback_modelo.AnalisadorFeedback",
+                   side_effect=[RuntimeError("falha temporaria"), modelo]) as carregar:
+            with self.assertRaises(RuntimeError):
+                _analisador("teste.pt", 1, "pt")
+            self.assertIs(_analisador("teste.pt", 1, "pt"), modelo)
+            self.assertIs(_analisador("teste.pt", 1, "pt"), modelo)
+            self.assertEqual(carregar.call_count, 2)
+
     def test_idioma_do_texto_independe_do_idioma_da_interface(self):
         with patch.dict(os.environ, {"FEEDBACK_MODELO": str(Path(self.tmp.name) / "ausente.pt")}):
             codigo = self.codigo.replace('st.session_state["idioma"] = "pt"',
@@ -60,7 +77,7 @@ render()
                 app.button[0].click().run(timeout=30)
                 self.assertEqual(len(app.exception), 0)
                 self.assertTrue(any(s.value.startswith(classe + " —") for s in [*app.success, *app.error]))
-                self.assertEqual(len(app.get("image")), 1)
+                self.assertEqual(len(app.get("imgs")), 1)
                 self.assertTrue(any(s.value == "Raio-X das palavras" for s in app.subheader))
                 self.assertTrue(any("ΔP=" in s.value for s in app.markdown))
                 self.assertEqual(len(app.text_area), 2)
@@ -80,7 +97,7 @@ render()
                 self.assertEqual(len(app.exception), 0)
                 self.assertTrue(any(s.value.startswith(classe + " —") for s in [*app.success, *app.error]))
                 self.assertIn("BiLSTM IMDB", app.text_area[1].value)
-                self.assertEqual(len(app.get("image")), 1)
+                self.assertEqual(len(app.get("imgs")), 1)
             app.selectbox[0].set_value("pt").run(timeout=30)
             self.assertNotIn("sentimento_resultado", app.session_state)
             self.assertFalse(app.success)

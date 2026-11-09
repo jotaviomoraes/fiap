@@ -17,8 +17,8 @@ from agropredict.entrada import FEATURES, Leitura, LeituraInvalida
 from agropredict.integridade import hash_leitura
 from agropredict.relatorios import FAIXAS_COMPORTAMENTO, MINIMO_PREDICOES_COMPORTAMENTO, PESOS_COMPORTAMENTO
 from i18n import (
-    formatar_data, formatar_numero, formato_data_input, idioma_atual, t, tr_acao, tr_classe, tr_faixa,
-    tr_motivo_override, tr_origem, tr_recomendacao, tr_status, tr_variavel,
+    formatar_data, formato_data_input, t, tr_acao, tr_classe, tr_faixa,
+    tr_motivo_override, tr_origem, tr_recomendacao, tr_variavel,
 )
 from ui_comum import (
     COR_SERIE_UNICA, EMOJI_RISCO, barra_filtros, botao_csv, contexto, exigir, explicacao_em_texto, tabela,

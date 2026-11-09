@@ -441,9 +441,10 @@ def render() -> None:
             else:
                 tabela(historico, height=320)
         with tab_oracle:
-            historico_oracle = _historico_oracle()
-            if historico_oracle is not None and len(historico_oracle) > 0:
-                st.success(t("✅ Conectado ao Oracle. {n} predições recentes.", n=len(historico_oracle)))
-                tabela(historico_oracle)
-            else:
-                st.info(t("ℹ️ Oracle não configurado ou indisponível. O SQLite continua registrando tudo."))
+            if st.button(t("Consultar réplica Oracle"), key="consultar_replica_oracle"):
+                historico_oracle = _historico_oracle()
+                if historico_oracle is not None and len(historico_oracle) > 0:
+                    st.success(t("✅ Conectado ao Oracle. {n} predições recentes.", n=len(historico_oracle)))
+                    tabela(historico_oracle)
+                else:
+                    st.info(t("ℹ️ Oracle não configurado ou indisponível. O SQLite continua registrando tudo."))

@@ -191,11 +191,9 @@ def tr_categoria(valor): return _tr_mapa("categorias", valor)
 def tr_faixa(valor): return _tr_mapa("faixas", valor)
 def tr_perfil(valor): return _tr_mapa("perfis", valor)
 def tr_fonte(valor): return _tr_mapa("fontes", valor)
-def tr_tipo_rejeicao(valor): return _tr_mapa("tipos_rejeicao", valor)
 def tr_origem(valor): return _tr_mapa("origens", valor)
 def tr_pagina(valor): return _tr_mapa("paginas", valor)
 def tr_variavel(valor): return _tr_mapa("variaveis", valor)
-def tr_coluna(categoria: str, valor): return _tr_mapa(categoria, valor)
 
 
 def tr_evento(evento):

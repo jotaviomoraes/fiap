@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from agropredict.modelo import ModeloIndisponivel  # noqa: E402
 from agropredict.seguranca import PERFIS, SenhaFraca  # noqa: E402
-from i18n import idioma_atual, seletor_idioma, t, tr_perfil  # noqa: E402
+from i18n import seletor_idioma, t, tr_perfil  # noqa: E402
 from ui_comum import contexto  # noqa: E402
 from scripts.simular_frota import popular_demonstracao  # noqa: E402
 

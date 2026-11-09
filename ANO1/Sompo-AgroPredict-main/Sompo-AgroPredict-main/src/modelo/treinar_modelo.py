@@ -62,7 +62,6 @@ sys.path.insert(0, str(RAIZ / "src"))
 
 from agropredict.entrada import FEATURES, FEATURES_NUMERICAS  # noqa: E402
 from agropredict.qualidade import CLASSES, limpar_dataset  # noqa: E402
-from agropredict.regras import PESO_RISCO  # noqa: E402
 
 VERSAO = "v2.0"
 RANDOM_STATE = 42
@@ -122,11 +121,6 @@ def candidatos(usar_status: bool = True) -> dict:
             {"clf__learning_rate": [0.05, 0.1], "clf__max_depth": [None, 6], "clf__max_iter": [300]},
         ),
     }
-
-
-def score_esperado(probas: np.ndarray, classes) -> np.ndarray:
-    pesos = np.array([PESO_RISCO[c] for c in classes])
-    return probas @ pesos
 
 
 def metricas(y_true, y_pred, probas, classes) -> dict:

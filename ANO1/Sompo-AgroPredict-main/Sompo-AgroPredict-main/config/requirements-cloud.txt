@@ -1,0 +1,4 @@
+# Dashboard completo, incluindo sentimento, sem bibliotecas CUDA.
+--extra-index-url https://download.pytorch.org/whl/cpu
+-r requirements.txt
+torch==2.15.0+cpu

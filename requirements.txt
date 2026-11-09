@@ -1,1 +1,1 @@
--r ANO1/Sompo-AgroPredict-main/Sompo-AgroPredict-main/config/requirements.txt
+-r ANO1/Sompo-AgroPredict-main/Sompo-AgroPredict-main/config/requirements-cloud.txt

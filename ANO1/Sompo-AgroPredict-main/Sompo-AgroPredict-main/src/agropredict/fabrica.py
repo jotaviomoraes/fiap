@@ -64,10 +64,7 @@ def criar_contexto(db_path: Path | str = DB_PATH, modelo_path: Path | str = MODE
                    com_oracle: bool = True, backend: str | None = None) -> Contexto:
     repo, backend_usado, aviso = abrir_repositorio(backend, db_path)
     # O log fica ao lado do banco usado: execucoes com banco temporario nao escrevem no projeto
-    if backend_usado == "oracle":
-        configurar_logging(Path(db_path).parent / "agropredict.log")
-    else:
-        configurar_logging(Path(db_path).parent / "agropredict.log")
+    configurar_logging(Path(db_path).parent / "agropredict.log")
     modelo = ModeloRisco.carregar(Path(modelo_path))
     # Oracle como banco principal nao precisa de replicacao. O SQLite
     # explicito (dev/testes) ainda pode replicar, se configurado.

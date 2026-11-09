@@ -15,7 +15,7 @@ from agropredict import modelo as modulo_modelo
 from agropredict.config import MODELO_META_PATH, MODELO_PATH
 from agropredict.fabrica import Contexto, criar_contexto
 from agropredict.relatorios import Filtros
-from agropredict.seguranca import PERFIS, Sessao
+from agropredict.seguranca import Sessao
 from i18n import (
     formato_data_input, formatar_numero, idioma_atual, t, traduzir_dataframe, tr_classe, tr_motivo_override,
     tr_perfil, tr_status, tr_variavel,

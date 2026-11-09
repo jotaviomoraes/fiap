@@ -7,6 +7,7 @@ Valores de dominio (classes, status, origens) ficam em `i18n.py`.
 from __future__ import annotations
 
 CATALOGO: list[tuple[str, str, str]] = [
+    ("Consultar réplica Oracle", "Query Oracle replica", "Consultar réplica Oracle"),
     # ---------------------------------------------------------------- geral
     ("Operação em tempo real", "Real-time operation", "Operación en tiempo real"),
     ("Frota e tendências", "Fleet and trends", "Flota y tendencias"),
@@ -504,41 +505,6 @@ CATALOGO: list[tuple[str, str, str]] = [
     ("idade", "age", "edad"),
 ]
 
-# Feedback do projeto (BiLSTM local).
-CATALOGO += [
-    ("Feedback do projeto", "Project feedback", "Comentarios del proyecto"),
-    ("💬 Sua opinião sobre o AgroPredict", "💬 Your feedback on AgroPredict", "💬 Tu opinión sobre AgroPredict"),
-    ("Conte o que funcionou bem e o que podemos melhorar no projeto.", "Tell us what worked well and what we can improve in the project.", "Cuéntanos qué funcionó bien y qué podemos mejorar en el proyecto."),
-    ("Experiência geral", "Overall experience", "Experiencia general"),
-    ("Facilidade de uso", "Ease of use", "Facilidad de uso"),
-    ("Previsões de risco", "Risk predictions", "Predicciones de riesgo"),
-    ("Desempenho do sistema", "System performance", "Rendimiento del sistema"),
-    ("Positivo", "Positive", "Positivo"),
-    ("Negativo", "Negative", "Negativo"),
-    ("Inconclusivo", "Inconclusive", "No concluyente"),
-    ("Não analisado", "Not analyzed", "Sin analizar"),
-    ("Obrigado! Seu feedback foi registrado.", "Thank you! Your feedback has been saved.", "¡Gracias! Tus comentarios se han guardado."),
-    ("Como você avalia o projeto?", "How do you rate the project?", "¿Cómo valoras el proyecto?"),
-    ("O que você está avaliando?", "What are you reviewing?", "¿Qué estás evaluando?"),
-    ("Idioma do comentário", "Comment language", "Idioma del comentario"),
-    ("Seu comentário", "Your comment", "Tu comentario"),
-    ("Ex.: os alertas ajudam na operação, mas o mapa poderia ser mais claro.", "E.g.: the alerts help with operations, but the map could be clearer.", "Ej.: las alertas ayudan en la operación, pero el mapa podría ser más claro."),
-    ("A análise automática está disponível para comentários em português. Sua nota é preservada.", "Automatic analysis is available for comments in Portuguese. Your rating is preserved.", "El análisis automático está disponible para comentarios en portugués. Tu valoración se conserva."),
-    ("Enviar feedback", "Send feedback", "Enviar comentarios"),
-    ("Selecione uma nota e escreva um comentário com pelo menos 5 caracteres.", "Select a rating and write a comment with at least 5 characters.", "Selecciona una valoración y escribe un comentario de al menos 5 caracteres."),
-    ("Não foi possível registrar o feedback. Confira os campos e tente novamente.", "Could not save the feedback. Check the fields and try again.", "No se pudieron guardar los comentarios. Revisa los campos e inténtalo de nuevo."),
-    ("Sobre a análise dos comentários", "About comment analysis", "Sobre el análisis de comentarios"),
-    ("O sentimento é uma estimativa de uma rede treinada em avaliações de produtos em português. Pode errar em comentários sobre o AgroPredict e não substitui sua nota.", "Sentiment is an estimate from a network trained on Portuguese product reviews. It may be wrong about AgroPredict comments and does not replace your rating.", "El sentimiento es una estimación de una red entrenada con reseñas de productos en portugués. Puede equivocarse con comentarios sobre AgroPredict y no sustituye tu valoración."),
-    ("O modelo identifica sentimento positivo ou negativo. Resultados ambíguos ficam inconclusivos; ele não gera respostas nem aprende automaticamente com os envios.", "The model identifies positive or negative sentiment. Ambiguous results remain inconclusive; it does not generate replies or automatically learn from submissions.", "El modelo identifica sentimiento positivo o negativo. Los resultados ambiguos quedan sin concluir; no genera respuestas ni aprende automáticamente de los envíos."),
-    ("A análise automática está indisponível. Você pode enviar seu feedback normalmente.", "Automatic analysis is unavailable. You can still submit your feedback.", "El análisis automático no está disponible. Puedes enviar tus comentarios normalmente."),
-    ("Feedbacks da equipe", "Team feedback", "Comentarios del equipo"),
-    ("Meus feedbacks", "My feedback", "Mis comentarios"),
-    ("Nenhum feedback registrado ainda.", "No feedback submitted yet.", "Todavía no hay comentarios registrados."),
-    ("Feedbacks exibidos", "Feedback displayed", "Comentarios mostrados"),
-    ("Nota média", "Average rating", "Valoración media"),
-    ("Exibindo os 500 envios mais recentes.", "Showing the 500 most recent submissions.", "Se muestran los 500 envíos más recientes."),
-    ("Sentimento estimado: {sentimento}", "Estimated sentiment: {sentimento}", "Sentimiento estimado: {sentimento}"),
-]
 
 CATALOGO += [
     ("Análise de sentimento", "Sentiment analysis", "Análisis de sentimiento"),
