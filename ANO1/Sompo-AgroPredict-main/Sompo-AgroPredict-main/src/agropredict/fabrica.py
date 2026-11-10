@@ -42,16 +42,12 @@ def abrir_repositorio(backend: str | None = None, db_path: Path | str = DB_PATH)
 
     from .repositorio_oracle import RepositorioOracle, configurado as oracle_configurado
 
-    config = config_oracle()
-    if not oracle_configurado(config):
-        if backend == "oracle":
-            raise RuntimeError(
-                "DB_BACKEND=oracle, mas ORACLE_USER/ORACLE_PASSWORD/ORACLE_DSN nao estao definidos "
-                "em config/.env."
-            )
-        return RepositorioSQLite(db_path), "sqlite", "Oracle nao configurado (credenciais ausentes)."
-
     try:
+        config = config_oracle()
+        if not oracle_configurado(config):
+            if backend == "oracle":
+                raise RuntimeError("Defina ORACLE_USER/ORACLE_PASSWORD/ORACLE_DSN no ambiente ou nos Secrets.")
+            return RepositorioSQLite(db_path), "sqlite", "Oracle nao configurado (credenciais ausentes)."
         return RepositorioOracle(config), "oracle", None
     except Exception as exc:
         if backend == "oracle":

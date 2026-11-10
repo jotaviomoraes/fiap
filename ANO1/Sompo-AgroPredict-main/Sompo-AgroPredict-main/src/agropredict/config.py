@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
+import tempfile
+from functools import lru_cache
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from threading import Lock
 
 RAIZ_PROJETO = Path(__file__).resolve().parents[2]
 
@@ -65,9 +69,63 @@ if BACKEND_PADRAO not in BACKENDS_VALIDOS:
     BACKEND_PADRAO = "auto"
 
 
+def _valor_config(nome: str, padrao: str = "") -> str:
+    """Ambiente/.env primeiro; Secrets TOML na raiz quando executado pelo Streamlit."""
+    valor = os.getenv(nome)
+    if valor is None:
+        streamlit = sys.modules.get("streamlit")
+        if streamlit is not None:
+            try:
+                valor = streamlit.secrets.get(nome)
+            except FileNotFoundError:
+                pass  # CLI e desenvolvimento sem secrets.toml continuam funcionando.
+            except Exception:
+                raise ValueError("Nao foi possivel ler os Secrets do Streamlit. Verifique o formato TOML.") from None
+    if valor is None:
+        return padrao
+    if not isinstance(valor, str):
+        raise ValueError(f"{nome} deve ser texto nos Secrets.")
+    return valor
+
+
+_LOCK_WALLET = Lock()
+
+
+@lru_cache(maxsize=None)
+def _criar_wallet_temporaria(tnsnames: str, pem: str) -> tempfile.TemporaryDirectory:
+    """O cache mantém a pasta viva até o fim do processo; nada é salvo no projeto."""
+    pasta = tempfile.TemporaryDirectory(prefix="agropredict-wallet-")
+    try:
+        for nome, conteudo in (("tnsnames.ora", tnsnames), ("ewallet.pem", pem)):
+            caminho = Path(pasta.name) / nome
+            # mkdtemp usa 0700 no Linux; os arquivos recebem 0600 na criação.
+            descritor = os.open(caminho, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(descritor, "w", encoding="utf-8", newline="\n") as arquivo:
+                arquivo.write(conteudo)
+    except OSError:
+        pasta.cleanup()
+        raise RuntimeError("Nao foi possivel criar os arquivos temporarios da wallet Oracle.") from None
+    return pasta
+
+
+def _wallet_dos_secrets(tnsnames: str, pem: str) -> str | None:
+    tnsnames = tnsnames.lstrip("\ufeff").replace("\r\n", "\n").strip()
+    pem = pem.lstrip("\ufeff").replace("\r\n", "\n").strip()
+    if not tnsnames and not pem:
+        return None
+    if not tnsnames or not pem:
+        raise ValueError("Defina ORACLE_TNSNAMES e ORACLE_WALLET_PEM juntos, com o conteudo completo dos arquivos.")
+    if "-----BEGIN " not in pem or "-----END " not in pem:
+        raise ValueError("ORACLE_WALLET_PEM deve conter o arquivo PEM completo, incluindo BEGIN e END.")
+    # Evita duas pastas simultâneas em sessões que abrem a primeira conexão juntas.
+    with _LOCK_WALLET:
+        return _criar_wallet_temporaria(tnsnames + "\n", pem + "\n").name
+
+
 def backend_configurado() -> str:
     """Backend pedido pela configuracao: auto, oracle ou sqlite."""
-    return BACKEND_PADRAO
+    backend = _valor_config("DB_BACKEND", BACKEND_PADRAO).strip().lower()
+    return backend if backend in BACKENDS_VALIDOS else "auto"
 
 
 def config_oracle() -> dict:
@@ -76,15 +134,21 @@ def config_oracle() -> dict:
     A wallet e passada explicitamente (`config_dir` e `wallet_location`)
     porque o `sqlnet.ora` da wallet costuma apontar para `?/network/admin`.
     Assim nao e necessario Oracle Instant Client nem TNS_ADMIN global.
+    ORACLE_TNSNAMES e ORACLE_WALLET_PEM juntos recriam a wallet temporaria
+    a partir do ambiente ou dos Secrets; sem eles, os caminhos locais permanecem.
     """
     config: dict = {
-        "user": (os.getenv("ORACLE_USER") or "").strip(),
-        "password": os.getenv("ORACLE_PASSWORD") or "",
-        "dsn": (os.getenv("ORACLE_DSN") or "joaopersonal_tp").strip(),
+        "user": _valor_config("ORACLE_USER").strip(),
+        "password": _valor_config("ORACLE_PASSWORD"),
+        "dsn": (_valor_config("ORACLE_DSN") or "joaopersonal_tp").strip(),
     }
-    config_dir = (os.getenv("ORACLE_CONFIG_DIR") or "").strip()
-    wallet_location = (os.getenv("ORACLE_WALLET_LOCATION") or "").strip()
-    wallet_password = os.getenv("ORACLE_WALLET_PASSWORD") or ""
+    config_dir = _valor_config("ORACLE_CONFIG_DIR").strip()
+    wallet_location = _valor_config("ORACLE_WALLET_LOCATION").strip()
+    wallet_password = _valor_config("ORACLE_WALLET_PASSWORD")
+    pasta_secrets = _wallet_dos_secrets(_valor_config("ORACLE_TNSNAMES"), _valor_config("ORACLE_WALLET_PEM"))
+    if pasta_secrets:
+        # Conteúdos explícitos substituem caminhos de outra máquina (ex.: Windows).
+        config_dir = wallet_location = pasta_secrets
     if config_dir:
         config["config_dir"] = config_dir
     if wallet_location:

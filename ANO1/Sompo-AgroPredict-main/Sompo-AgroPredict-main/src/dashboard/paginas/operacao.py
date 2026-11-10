@@ -50,10 +50,10 @@ def _clima(lat: float, lon: float) -> dict:
 
 @st.cache_data(ttl=60)
 def _historico_oracle():
-    config = config_oracle()
-    if not oracle_configurado(config):
-        return None
     try:
+        config = config_oracle()
+        if not oracle_configurado(config):
+            return None
         import oracledb
         with oracledb.connect(**config) as conn:
             return pd.read_sql("""

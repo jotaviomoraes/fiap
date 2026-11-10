@@ -549,3 +549,11 @@ CATALOGO += [
     ("Dispositivo: {dispositivo}", "Device: {dispositivo}", "Dispositivo: {dispositivo}"),
     ("Palavras mais decisivas: {palavras}", "Most influential words: {palavras}", "Palabras más decisivas: {palavras}"),
 ]
+
+
+# Diagnostico dos modelos
+try:
+    from .traducoes_raio_x import CATALOGO_RAIO_X
+except ImportError:
+    from traducoes_raio_x import CATALOGO_RAIO_X
+CATALOGO += CATALOGO_RAIO_X

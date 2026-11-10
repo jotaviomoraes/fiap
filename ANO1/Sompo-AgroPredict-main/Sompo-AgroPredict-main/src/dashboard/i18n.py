@@ -68,7 +68,7 @@ ORIGENS = {"dashboard": ("dashboard", "dashboard"), "simulador": ("simulator", "
            "validacao-corrupcao": ("corruption test", "prueba de corrupción")}
 PAGINAS = {"operacao": ("operation", "operación"), "frota": ("fleet", "flota"),
            "alertas": ("alerts", "alertas"), "manutencao": ("maintenance", "mantenimiento"),
-           "auditoria": ("audit", "auditoría")}
+           "auditoria": ("audit", "auditoría"), "raio_x": ("model diagnostics", "diagnóstico de modelos")}
 EVENTOS = {"login": ("login", "inicio de sesión"), "logout": ("logout", "cierre de sesión"),
            "login_bloqueado": ("blocked login", "inicio de sesión bloqueado")}
 

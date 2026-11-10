@@ -31,6 +31,7 @@ PERFIS = {
 }
 
 PERMISSOES = {
+    "raio_x": set(PERFIS),
     "feedback": set(PERFIS),
     "operacao": {"operador", "gestor", "admin"},
     "frota": {"gestor", "analista", "admin"},

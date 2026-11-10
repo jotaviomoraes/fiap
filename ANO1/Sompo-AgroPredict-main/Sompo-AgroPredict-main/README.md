@@ -272,6 +272,35 @@ estiver acessível, o sistema continua no SQLite automaticamente. Para forçar u
 `DB_BACKEND=oracle`, `DB_BACKEND=sqlite` ou `DB_BACKEND=auto` (padrão). Ingestão em lote:
 `python src/sql/inserir_predicoes.py --n 100`.
 
+### Raio X dos modelos
+
+Após o login, abra **Raio X** na navegação. Todos os perfis podem comparar os três candidatos
+de risco pela validação cruzada: acurácia, F1 macro e recall de ALTO, com uma linha por modelo.
+A escala vai de 80% a 100%, com linhas de 5 em 5 pontos percentuais. A página explica o critério
+de seleção e os limites dos dados sintéticos, da calibração e do retreino final.
+
+O gráfico usa as avaliações registradas em `modelo_meta.json`, sem carregar pesos ou
+executar treinamento. A avaliação individual por modelo foi removida da interface.
+
+### Oracle no Streamlit Cloud
+
+Copie o modelo de `config/secrets.example.toml` para **Settings → Secrets** no Streamlit
+Cloud. Preencha as credenciais, o alias em `ORACLE_DSN` e a senha definida ao baixar a wallet.
+Cole o conteúdo completo de `tnsnames.ora` em `ORACLE_TNSNAMES` e de `ewallet.pem` em
+`ORACLE_WALLET_PEM`, preservando as quebras de linha e todos os blocos BEGIN/END.
+As chaves devem ficar na raiz do TOML, sem uma seção `[oracle]`.
+
+O aplicativo recria os dois arquivos em uma pasta temporária privada do servidor e usa
+essa pasta em `config_dir` e `wallet_location`. Os arquivos são reutilizados no processo
+e removidos ao encerrar; não são gravados no repositório. Quando os dois conteúdos estão
+presentes, substituem caminhos locais. Sem eles, a configuração existente de arquivos
+locais continua funcionando. Variáveis de ambiente e `.env` têm precedência sobre Secrets.
+
+Depois de publicar o código atualizado e salvar os Secrets, reinicie o aplicativo para
+refazer o contexto e a conexão. Em `DB_BACKEND="auto"`, falhas mantêm o fallback SQLite;
+em `DB_BACKEND="oracle"`, a inicialização informa o erro em vez de usar SQLite. O log do
+deploy registra o motivo da falha. Não publique credenciais nem o conteúdo da wallet no GitHub.
+
 ### Idiomas do dashboard
 
 A interface do dashboard está disponível em **português, inglês e espanhol**. Use o seletor

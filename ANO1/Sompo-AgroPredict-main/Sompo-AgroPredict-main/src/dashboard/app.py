@@ -26,7 +26,7 @@ from i18n import seletor_idioma, t, tr_perfil  # noqa: E402
 from ui_comum import contexto  # noqa: E402
 from scripts.simular_frota import popular_demonstracao  # noqa: E402
 
-from paginas import alertas, auditoria, feedback, frota, manutencao, operacao  # noqa: E402
+from paginas import alertas, auditoria, feedback, frota, manutencao, operacao, raio_x  # noqa: E402
 
 st.set_page_config(
     page_title="AgroPredict",
@@ -43,6 +43,7 @@ PAGINAS = [
     ("manutencao", manutencao.render, "Manutenção", "🔧", "manutencao"),
     ("auditoria", auditoria.render, "Auditoria de risco", "🔎", "auditoria"),
     ("feedback", feedback.render, "Análise de sentimento", "💬", "feedback"),
+    ("raio_x", raio_x.render, "Raio X", "🔬", "raio_x"),
 ]
 
 
