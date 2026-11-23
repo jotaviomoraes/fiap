@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from agropredict.modelo import ModeloIndisponivel  # noqa: E402
 from agropredict.seguranca import PERFIS, SenhaFraca  # noqa: E402
 from i18n import seletor_idioma, t, tr_perfil  # noqa: E402
+from tema import aplicar_tema, status_risco_lateral  # noqa: E402
 from ui_comum import contexto  # noqa: E402
 from scripts.simular_frota import popular_demonstracao  # noqa: E402
 
@@ -32,7 +33,7 @@ st.set_page_config(
     page_title="AgroPredict",
     page_icon="🌾",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 PAGINAS = [
@@ -111,6 +112,8 @@ def tela_login(ctx) -> None:
 
 
 def main() -> None:
+    aplicar_tema()
+    st.sidebar.header("AgroPredict")
     seletor_idioma()
     ctx = carregar_contexto()
     sessao = st.session_state.get("sessao")
@@ -131,12 +134,15 @@ def main() -> None:
             st.rerun()
         st.markdown("---")
 
-    paginas = [
-        st.Page(funcao, title=t(titulo), icon=icone, url_path=url)
+    paginas = {
+        recurso: st.Page(funcao, title=t(titulo), icon=icone, url_path=url)
         for recurso, funcao, titulo, icone, url in PAGINAS
         if sessao.pode(recurso)
-    ]
-    st.navigation(paginas).run()
+    }
+    pagina = st.navigation(list(paginas.values()))
+    if pagina is not paginas.get("operacao"):
+        status_risco_lateral()
+    pagina.run()
 
 
 main()

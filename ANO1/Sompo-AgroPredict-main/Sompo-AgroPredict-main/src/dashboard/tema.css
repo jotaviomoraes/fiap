@@ -1,0 +1,238 @@
+:root {
+    --agro-bg: #f8f3eb;
+    --agro-surface: #fffcf6;
+    --agro-ink: #252837;
+    --agro-muted: #5c5968;
+    --agro-line: #ded5c6;
+    --agro-accent: #4d3c95;
+    --agro-soft: #efe6ff;
+    --agro-risk-bg: #2e2645;
+    --agro-risk-ink: #fff5ef;
+    --agro-risk-muted: #ebdff4;
+    --agro-risk-score: #fff5ef;
+    --agro-risk-active: #483a63;
+    --agro-risk-line: #ad98c9;
+}
+
+:root:has(.agro-sidebar-risk[data-risk="BAIXO"]),
+.agro-risk[data-risk="BAIXO"] {
+    --agro-risk-bg: #174834;
+    --agro-risk-ink: #f2fff4;
+    --agro-risk-muted: #ccebdd;
+    --agro-risk-score: #c9f9c5;
+    --agro-risk-active: #28664d;
+    --agro-risk-line: #76a991;
+}
+
+:root:has(.agro-sidebar-risk[data-risk="MEDIO"]),
+.agro-risk[data-risk="MEDIO"] {
+    --agro-risk-bg: #f9df88;
+    --agro-risk-ink: #33230b;
+    --agro-risk-muted: #554021;
+    --agro-risk-score: #382608;
+    --agro-risk-active: #edcc63;
+    --agro-risk-line: #947126;
+}
+
+:root:has(.agro-sidebar-risk[data-risk="ALTO"]),
+.agro-risk[data-risk="ALTO"] {
+    --agro-risk-bg: #792b32;
+    --agro-risk-ink: #fff4f3;
+    --agro-risk-muted: #ffdad7;
+    --agro-risk-score: #ffd2cc;
+    --agro-risk-active: #9c4048;
+    --agro-risk-line: #d58f8e;
+}
+
+[data-testid="stAppViewContainer"] {
+    background: var(--agro-bg);
+    color: var(--agro-ink);
+}
+
+[data-testid="stHeader"] {
+    background: var(--agro-bg);
+    color: var(--agro-ink);
+}
+
+[data-testid="stMainBlockContainer"] {
+    max-width: 1270px;
+    padding-inline: clamp(1rem, 3vw, 2.3rem);
+}
+
+[data-testid="stMainBlockContainer"] [data-testid="stHeading"] h1 {
+    border-radius: 20px;
+    background: repeating-radial-gradient(
+        ellipse at 94% 120%, transparent 0 12px, #6955a522 13px 14px, transparent 15px 23px
+    ), var(--agro-soft);
+    color: var(--agro-ink);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    font: 600 clamp(2rem, 4vw, 3rem)/1.1 Georgia, serif;
+    letter-spacing: -.045em;
+}
+
+[data-testid="stMainBlockContainer"] :is(
+    h2, h3, h4, [data-testid="stMetricValue"],
+    :not([data-testid="stAlert"]) > [data-testid="stMarkdownContainer"] > p,
+    [data-testid="stWidgetLabel"] p
+) {
+    color: var(--agro-ink);
+}
+
+[data-testid="stMainBlockContainer"] [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
+    color: inherit;
+}
+
+[data-testid="stMainBlockContainer"] [data-testid="stCaptionContainer"] p {
+    color: var(--agro-muted);
+}
+
+[data-testid="stMainBlockContainer"] :is([data-testid="stForm"], [data-testid="stVerticalBlockBorderWrapper"]) {
+    border-color: var(--agro-line);
+    border-radius: 20px;
+}
+
+.st-key-agro_telemetria, .st-key-agro_alertas, .st-key-agro_probabilidades, .st-key-agro_contexto {
+    background: var(--agro-surface);
+    border-radius: 20px;
+}
+
+[data-testid="stSidebar"] {
+    background: var(--agro-risk-bg);
+    color: var(--agro-risk-ink);
+    border-right: 1px solid var(--agro-risk-line);
+}
+
+[data-testid="stSidebar"] :is(
+    [data-testid="stSidebarNavLink"], [data-testid="stSidebarNavLink"] span,
+    [data-testid="stSidebarNavSeparator"], [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] strong, [data-testid="stWidgetLabel"] p,
+    [data-testid="stHeading"] h2,
+    [data-testid="stSidebarCollapseButton"] button
+) {
+    color: var(--agro-risk-ink);
+}
+
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] p {
+    color: var(--agro-risk-muted);
+}
+
+[data-testid="stSidebarNavLink"] {
+    border-radius: 10px;
+}
+
+[data-testid="stSidebarNavLink"]:is(:hover, [aria-current="page"], [aria-selected="true"]) {
+    background: var(--agro-risk-active);
+    box-shadow: inset 3px 0 var(--agro-risk-score);
+}
+
+[data-testid="stSidebarNavLink"]:focus-visible {
+    outline: 2px solid var(--agro-risk-score);
+    outline-offset: 2px;
+}
+
+[data-testid="stSidebar"] hr {
+    border-color: var(--agro-risk-line);
+}
+
+[data-testid="stMainBlockContainer"] :is(
+    [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-tertiary"],
+    [data-testid="stExpander"] summary, [data-testid="stTabs"] [role="tab"]
+) {
+    color: var(--agro-ink);
+}
+
+[data-testid="stMainBlockContainer"] :is(
+    [data-testid="stBaseButton-primary"], [data-testid="stFormSubmitButton"] button
+) {
+    background: var(--agro-accent);
+    border-color: var(--agro-accent);
+    color: white;
+}
+
+[data-testid="stMainBlockContainer"] :is(
+    [data-testid="stBaseButton-primary"], [data-testid="stFormSubmitButton"] button
+):hover {
+    background: #3a287e;
+    border-color: #3a287e;
+}
+
+.agro-sidebar-risk {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: .25rem .55rem;
+    align-items: center;
+    color: var(--agro-risk-muted);
+    font-size: .85rem;
+}
+
+.agro-risk {
+    background: var(--agro-risk-bg);
+    color: var(--agro-risk-ink);
+    border: 1px solid var(--agro-risk-line);
+    border-radius: 23px;
+    padding: clamp(1rem, 3vw, 1.6rem);
+    box-shadow: 0 3px 0 #cbbda82b;
+}
+
+.agro-risk-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
+.agro-risk-label, .agro-risk-score small {
+    font-size: .92rem;
+    color: var(--agro-risk-muted);
+    font-weight: 650;
+}
+
+.agro-risk-score {
+    margin: .15rem 0 .65rem;
+    color: var(--agro-risk-score);
+    font-size: clamp(2.75rem, 7vw, 5.1rem);
+    font-weight: 780;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.07em;
+    line-height: 1.04;
+}
+
+.agro-risk-score small {
+    letter-spacing: 0;
+}
+
+.agro-risk-chip {
+    background: var(--agro-risk-ink);
+    color: var(--agro-risk-bg);
+    border-radius: 7px;
+    padding: .25rem .65rem;
+    font-size: .85rem;
+    font-weight: 750;
+}
+
+.agro-risk p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+@media (max-width: 850px) {
+    .st-key-agro_operacao [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-agro_telemetria) {
+        flex-direction: column;
+    }
+
+    .st-key-agro_operacao [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-agro_telemetria)
+    > [data-testid="stColumn"] {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+}
+
+@media (max-width: 750px) {
+    :root:has(.agro-sidebar-risk) [data-testid="stExpandSidebarButton"] {
+        background: var(--agro-risk-bg);
+        color: var(--agro-risk-ink);
+        border-radius: 8px;
+    }
+}

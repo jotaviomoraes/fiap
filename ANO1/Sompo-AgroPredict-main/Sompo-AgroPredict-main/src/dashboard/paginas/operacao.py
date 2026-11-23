@@ -24,8 +24,9 @@ from agropredict.relatorios import Filtros
 from agropredict.servico import ErroProcessamento, LeituraDuplicada
 from gps import capturar_posicao, obter_velocidade_kmh
 from i18n import formatar_numero, t, tr_classe, tr_motivo_override, tr_recomendacao, tr_status
+from tema import cartao_risco, status_risco_lateral
 from ui_comum import (
-    CORES_RISCO, EMOJI_ACAO, EMOJI_RISCO, contexto, emitir_sinal, exigir, explicacao_em_texto, formatar_hhmm,
+    EMOJI_ACAO, EMOJI_RISCO, contexto, emitir_sinal, exigir, explicacao_em_texto, formatar_hhmm,
     rotulo_classe, tabela,
 )
 
@@ -74,29 +75,29 @@ def label_alerta(valor, chave):
     return t("✅ OK")
 
 
-def _sidebar_entradas(ctx):
+def _entradas(ctx):
     """Coleta as 8 features + equipamento + origem de cada dado."""
     equipamentos = ctx.repo.listar_equipamentos()
     rotulos = {
         int(r.id_equipamento): f"{r.codigo} · {r.tipo} {r.modelo} ({r.regiao})"
         for r in equipamentos.itertuples()
     }
-    st.sidebar.markdown(t("### 🚜 Equipamento"))
-    id_equipamento = st.sidebar.selectbox(
+    st.markdown(t("### 🚜 Equipamento"))
+    id_equipamento = st.selectbox(
         t("Equipamento em operação"), list(rotulos), format_func=rotulos.get, key="op_equipamento"
     )
     equip = ctx.repo.obter_equipamento(id_equipamento)
 
-    modo_real = st.sidebar.toggle(
+    modo_real = st.toggle(
         t("📡 Usar GPS + clima em tempo real"), value=True,
         help=t("Desative para digitar tudo manualmente (modo demo/offline)."),
     )
     # Uma nova captura so e solicitada pelo usuario, sem temporizador.
-    if modo_real and st.sidebar.button(t("🔄 Atualizar GPS"), key="atualizar_gps"):
+    if modo_real and st.button(t("🔄 Atualizar GPS"), key="atualizar_gps"):
         st.session_state["_ciclo_gps"] = st.session_state.get("_ciclo_gps", 0) + 1
     ciclo = st.session_state.get("_ciclo_gps", 0)
 
-    with st.sidebar.expander(t("✍️ Substituir algum campo manualmente")):
+    with st.expander(t("✍️ Substituir algum campo manualmente")):
         st.caption(t("Marque se o sensor correspondente não conectou hoje."))
         manual_velocidade = st.checkbox(t("Velocidade"), key="manual_velocidade")
         manual_clima = st.checkbox(t("Temperatura / Chuva"), key="manual_clima")
@@ -108,64 +109,64 @@ def _sidebar_entradas(ctx):
     velocidade_gps, origem_velocidade = obter_velocidade_kmh(posicao) if modo_real else (None, "indisponivel")
     clima = _clima(posicao["lat"], posicao["lon"]) if modo_real and posicao and posicao.get("lat") is not None else None
 
-    st.sidebar.markdown(t("### 📍 Status da telemetria"))
+    st.markdown(t("### 📍 Status da telemetria"))
     if modo_real:
         if posicao is None:
-            st.sidebar.warning(t("Aguardando permissão de localização do navegador…"))
+            st.warning(t("Aguardando permissão de localização do navegador…"))
         else:
-            st.sidebar.caption(
+            st.caption(
                 t("GPS: {lat}, {lon} (±{acc}m) · leitura #{ciclo}",
                   lat=f"{posicao['lat']:.5f}", lon=f"{posicao['lon']:.5f}",
                   acc=posicao.get("accuracy_m", "?"), ciclo=ciclo)
             )
         if clima and clima["ok"]:
-            st.sidebar.caption(t("Clima: Open-Meteo · atualizado agora"))
+            st.caption(t("Clima: Open-Meteo · atualizado agora"))
         elif clima and not clima["ok"]:
-            st.sidebar.error(t("Falha na API de clima: {erro}", erro=clima.get("erro", "")))
+            st.error(t("Falha na API de clima: {erro}", erro=clima.get("erro", "")))
     else:
-        st.sidebar.caption(t("Modo manual — sem captura em tempo real."))
+        st.caption(t("Modo manual — sem captura em tempo real."))
 
-    st.sidebar.markdown(t("### Variáveis ambientais"))
+    st.markdown(t("### Variáveis ambientais"))
     umidade_auto = clima["umidade_solo"] if clima and clima.get("umidade_solo") is not None else None
     if manual_umidade or umidade_auto is None:
-        umidade_solo = st.sidebar.slider(t("Umidade do solo (%)"), 0, 100, int(umidade_auto or 20))
+        umidade_solo = st.slider(t("Umidade do solo (%)"), 0, 100, int(umidade_auto or 20))
         fonte_umidade = "manual"
     else:
         umidade_solo, fonte_umidade = umidade_auto, "open-meteo"
-        st.sidebar.metric(t("Umidade do solo (auto)"), f"{umidade_solo:.0f}%")
+        st.metric(t("Umidade do solo (auto)"), f"{umidade_solo:.0f}%")
 
-    declividade = st.sidebar.slider(
+    declividade = st.slider(
         t("Declividade (%)"), 0, 25, 8,
         help=t("Ainda depende de mapa GIS/satélite por talhão — não coberto pelo GPS do celular."),
     )
 
     if manual_clima or not (clima and clima["ok"]):
-        chuva_24h = st.sidebar.slider(t("Chuva 24h (mm)"), 0, 40, 4)
-        temperatura = st.sidebar.slider(t("Temperatura (°C)"), 15, 45, 26)
+        chuva_24h = st.slider(t("Chuva 24h (mm)"), 0, 40, 4)
+        temperatura = st.slider(t("Temperatura (°C)"), 15, 45, 26)
         fonte_clima = "manual"
     else:
         chuva_24h, temperatura, fonte_clima = clima["chuva_24h"], clima["temperatura"], "open-meteo"
-        st.sidebar.metric(t("Chuva 24h (auto)"), f"{chuva_24h:.1f} mm")
-        st.sidebar.metric(t("Temperatura (auto)"), f"{temperatura:.1f}°C")
+        st.metric(t("Chuva 24h (auto)"), f"{chuva_24h:.1f} mm")
+        st.metric(t("Temperatura (auto)"), f"{temperatura:.1f}°C")
 
-    st.sidebar.markdown(t("### Variáveis operacionais"))
+    st.markdown(t("### Variáveis operacionais"))
     if manual_velocidade or velocidade_gps is None:
-        velocidade, fonte_velocidade = st.sidebar.slider(t("Velocidade (km/h)"), 0, 20, 7), "manual"
+        velocidade, fonte_velocidade = st.slider(t("Velocidade (km/h)"), 0, 20, 7), "manual"
         if modo_real and not manual_velocidade:
-            st.sidebar.caption(t("⏳ Aguardando 2ª leitura de GPS para calcular velocidade…"))
+            st.caption(t("⏳ Aguardando 2ª leitura de GPS para calcular velocidade…"))
     else:
         velocidade, fonte_velocidade = velocidade_gps, origem_velocidade
-        st.sidebar.metric(t("Velocidade (auto)"), f"{velocidade:.1f} km/h", t(origem_velocidade))
+        st.metric(t("Velocidade (auto)"), f"{velocidade:.1f} km/h", t(origem_velocidade))
 
     idade_cadastro = max(0, date.today().year - int(equip["ano_fabricacao"]))
     if manual_idade:
-        idade_maquina = st.sidebar.slider(
+        idade_maquina = st.slider(
             t("Idade da máquina (anos)"), 0, 20, min(idade_cadastro, 20)
         )
         fonte_idade = "manual"
     else:
         idade_maquina, fonte_idade = idade_cadastro, "cadastro"
-        st.sidebar.metric(
+        st.metric(
             t("Idade da máquina (cadastro)"), t("{idade} anos", idade=idade_maquina),
             t("fabricação {ano}", ano=equip["ano_fabricacao"]),
         )
@@ -184,19 +185,19 @@ def _sidebar_entradas(ctx):
         st.session_state.pop("_ultimo_tick_horas", None)
 
     if manual_horas:
-        horas_operacao = st.sidebar.slider(t("Horas de operação (acumuladas)"), 0, 14, 5)
+        horas_operacao = st.slider(t("Horas de operação (acumuladas)"), 0, 14, 5)
         fonte_horas = "manual"
-        st.sidebar.caption(t("≈ {hora}", hora=formatar_hhmm(horas_operacao)))
+        st.caption(t("≈ {hora}", hora=formatar_hhmm(horas_operacao)))
     else:
         horas_operacao = round(min(st.session_state["_horas_acumuladas"], 14.0), 2)
         fonte_horas = "gps_auto" if contando else "pausado"
-        st.sidebar.metric(t("Horas de operação (auto)"), formatar_hhmm(horas_operacao), t(fonte_horas))
-        if st.sidebar.button(t("🔄 Reiniciar contador de horas")):
+        st.metric(t("Horas de operação (auto)"), formatar_hhmm(horas_operacao), t(fonte_horas))
+        if st.button(t("🔄 Reiniciar contador de horas")):
             st.session_state["_horas_acumuladas"] = 0.0
             st.session_state.pop("_ultimo_tick_horas", None)
             st.rerun()
 
-    status_operacao = st.sidebar.selectbox(t("Tipo de operação"), list(STATUS_VALIDOS), format_func=tr_status)
+    status_operacao = st.selectbox(t("Tipo de operação"), list(STATUS_VALIDOS), format_func=tr_status)
 
     dados = {
         "umidade_solo": umidade_solo, "declividade": declividade, "chuva_24h": chuva_24h,
@@ -237,11 +238,25 @@ def _painel_alertas_pendentes(ctx, sessao, id_equipamento: int) -> None:
 def render() -> None:
     sessao = exigir("operacao")
     ctx = contexto()
-    equip, modo_real, dados, fontes, posicao = _sidebar_entradas(ctx)
-    som_ativo = st.sidebar.toggle(
-        t("🔊 Alerta sonoro e vibração"), value=True, key="op_som",
-        help=t("Sinal curto ao entrar em MÉDIO; sinal repetido e vibração em ALTO."),
+    st.title(t("Operação em tempo real"))
+    equipamento_info = st.empty()
+    with st.container(key="agro_operacao"):
+        painel, entrada = st.columns([1.45, 1], gap="medium")
+        with entrada:
+            telemetria = st.container(border=True, key="agro_telemetria")
+        with telemetria:
+            st.subheader(t("Equipamento e telemetria"))
+            equip, modo_real, dados, fontes, posicao = _entradas(ctx)
+            som_ativo = st.toggle(
+                t("🔊 Alerta sonoro e vibração"), value=True, key="op_som",
+                help=t("Sinal curto ao entrar em MÉDIO; sinal repetido e vibração em ALTO."),
+            )
+
+    equipamento_info.caption(
+        f"{equip['codigo']} · {equip['tipo']} {equip['fabricante']} {equip['modelo']} · "
+        f"{equip['fazenda']} · {equip['regiao']}"
     )
+    avisos = painel.container()
 
     # ------------------------------------------------------------------
     # Previa (sem gravar) — mesma funcao de avaliacao usada na gravacao
@@ -252,11 +267,13 @@ def render() -> None:
         with threadpool_limits(limits=1):
             _, avaliacao = _avaliar_previa(ctx, dados)
     except LeituraInvalida as exc:
-        st.error(t("❌ Leitura rejeitada pela validação de entrada — nada foi gravado."))
-        for problema in exc.problemas:
-            from i18n import tr_motivo_rejeicao
-            st.markdown(f"- {tr_motivo_rejeicao(problema)}")
-        st.info(t("Use **Substituir algum campo manualmente** na barra lateral para corrigir o dado."))
+        st.session_state.pop("_agro_risco_operacao", None)
+        with avisos:
+            st.error(t("❌ Leitura rejeitada pela validação de entrada — nada foi gravado."))
+            for problema in exc.problemas:
+                from i18n import tr_motivo_rejeicao
+                st.markdown(f"- {tr_motivo_rejeicao(problema)}")
+            st.info(t("Use **Substituir algum campo manualmente** no painel de telemetria para corrigir o dado."))
         st.stop()
 
     # ------------------------------------------------------------------
@@ -270,7 +287,7 @@ def render() -> None:
         telemetria_ativa and agora_ts - st.session_state.get("_ultimo_save", 0) >= INTERVALO_MIN_GRAVACAO
     )
     gravar_manual = (
-        st.sidebar.button(t("💾 Registrar leitura"), type="primary", width="stretch") if not telemetria_ativa else False
+        telemetria.button(t("💾 Registrar leitura"), type="primary", width="stretch") if not telemetria_ativa else False
     )
 
     resultado = None
@@ -285,54 +302,42 @@ def render() -> None:
             st.session_state["_ultimo_resultado"] = (resultado.id_leitura, resultado.id_predicao, resultado.id_alerta)
         except LeituraDuplicada as exc:
             st.session_state["_ultimo_save"] = agora_ts
-            st.info(t("ℹ️ Leitura idêntica à #{id} já registrada — não foi gravada de novo.", id=exc.id_existente))
+            avisos.info(t("ℹ️ Leitura idêntica à #{id} já registrada — não foi gravada de novo.", id=exc.id_existente))
         except (ErroProcessamento, ValueError) as exc:
-            st.error(t("❌ Falha ao registrar a leitura: {erro}", erro=exc))
+            avisos.error(t("❌ Falha ao registrar a leitura: {erro}", erro=exc))
 
     # ------------------------------------------------------------------
     # Saida
     # ------------------------------------------------------------------
-    st.title(t("🌾 AgroPredict — Operação em tempo real"))
-    st.caption(
-        f"{equip['codigo']} · {equip['tipo']} {equip['fabricante']} {equip['modelo']} · "
-        f"{equip['fazenda']} · {equip['regiao']}"
-    )
-
     ultimo = st.session_state.get("_ultimo_resultado")
-    if resultado:
-        extra = t(" → alerta #{id}", id=resultado.id_alerta) if resultado.id_alerta else ""
-        st.success(t(
-            "💾 Leitura #{leitura} → predição #{predicao}{extra} gravadas no banco.",
-            leitura=resultado.id_leitura, predicao=resultado.id_predicao, extra=extra,
-        ))
-    elif ultimo:
-        st.caption(t(
-            "Última gravação: leitura #{leitura} → predição #{predicao}. Exibindo prévia da leitura atual.",
-            leitura=ultimo[0], predicao=ultimo[1],
-        ))
-    elif not telemetria_ativa:
-        st.info(t("Prévia — ainda não gravada. Use **💾 Registrar leitura** na barra lateral."))
+    with avisos:
+        if resultado:
+            extra = t(" → alerta #{id}", id=resultado.id_alerta) if resultado.id_alerta else ""
+            st.success(t(
+                "💾 Leitura #{leitura} → predição #{predicao}{extra} gravadas no banco.",
+                leitura=resultado.id_leitura, predicao=resultado.id_predicao, extra=extra,
+            ))
+        elif ultimo:
+            st.caption(t(
+                "Última gravação: leitura #{leitura} → predição #{predicao}. Exibindo prévia da leitura atual.",
+                leitura=ultimo[0], predicao=ultimo[1],
+            ))
+        elif not telemetria_ativa:
+            st.info(t("Prévia — ainda não gravada. Use **💾 Registrar leitura** no painel de telemetria."))
 
     classe = avaliacao.classe_risco
+    st.session_state["_agro_risco_operacao"] = (classe, str(equip["codigo"]))
+    status_risco_lateral()
     # US-01: sinal curto na transicao para MEDIO; sinal repetido + vibracao a cada ciclo em ALTO
     anterior = st.session_state.get("_classe_sinalizada")
     if som_ativo and (classe == "ALTO" or (classe == "MEDIO" and anterior != "MEDIO")):
         emitir_sinal(classe)
     st.session_state["_classe_sinalizada"] = classe
 
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown(
-            f"""
-            <div style='background-color:{CORES_RISCO[classe]};padding:30px;
-                        border-radius:12px;color:white;text-align:center;'>
-                <h1 style='margin:0;font-size:60px;color:white;'>{EMOJI_RISCO[classe]} {tr_classe(classe)}</h1>
-                <h2 style='margin:5px 0;color:white;'>{t("Score")}: {avaliacao.score_risco:.1f} / 100</h2>
-                <p style='margin:10px 0 0 0;font-size:18px;'><strong>{tr_recomendacao(avaliacao.recomendacao)}</strong></p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    with painel:
+        cartao_risco(avaliacao)
+        with st.container(border=True, key="agro_alertas"):
+            _painel_alertas_pendentes(ctx, sessao, equip["id_equipamento"])
         if avaliacao.override_aplicado:
             st.warning(t("⚡ **Override ativado:** {motivo}", motivo=tr_motivo_override(avaliacao.motivo_override)))
         elif avaliacao.variaveis_alerta:
@@ -354,7 +359,8 @@ def render() -> None:
                 "operação segura. Calculado para esta leitura, pelo próprio modelo."
             ))
 
-    with col2:
+    probabilidade, contexto_leitura = st.columns(2)
+    with probabilidade.container(border=True, key="agro_probabilidades"):
         st.markdown(t("### Probabilidades"))
         for c in ("BAIXO", "MEDIO", "ALTO"):
             p = avaliacao.prob(c)
@@ -362,7 +368,7 @@ def render() -> None:
             st.progress(float(p))
             st.caption(f"{p * 100:.1f}%")
 
-    with col3:
+    with contexto_leitura.container(border=True, key="agro_contexto"):
         st.markdown(t("### Contexto"))
         st.metric(t("Operação"), tr_status(dados["status_operacao"]))
         st.metric(t("Classe do modelo"), tr_classe(avaliacao.classe_modelo))
@@ -388,9 +394,6 @@ def render() -> None:
     col_g.metric(t("Horas operação"), formatar_hhmm(d["horas_operacao"]),
                  label_alerta(d["horas_operacao"], "horas_operacao"))
     col_h.metric(t("Tipo"), tr_status(d["status_operacao"]))
-
-    st.markdown("---")
-    _painel_alertas_pendentes(ctx, sessao, equip["id_equipamento"])
 
     st.markdown("---")
     st.subheader(t("🔍 Quais variáveis mais influenciam o modelo?"))
