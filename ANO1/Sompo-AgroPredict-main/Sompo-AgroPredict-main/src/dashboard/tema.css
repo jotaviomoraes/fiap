@@ -71,15 +71,47 @@
 }
 
 [data-testid="stMainBlockContainer"] :is(
-    h2, h3, h4, [data-testid="stMetricValue"],
-    :not([data-testid="stAlert"]) > [data-testid="stMarkdownContainer"] > p,
-    [data-testid="stWidgetLabel"] p
+    h2, h3, h4, [data-testid="stMetricValue"]
 ) {
     color: var(--agro-ink);
 }
 
-[data-testid="stMainBlockContainer"] [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {
-    color: inherit;
+[data-testid="stMainBlockContainer"] :is(
+    [data-testid="stMarkdownContainer"], [data-testid="stWidgetLabel"] p
+):not([data-testid="stAlertContainer"] *, button *, summary *, [role="tab"] *) {
+    color: var(--agro-ink);
+}
+
+/* As notificações nativas têm fundo próprio, inclusive no tema escuro do Streamlit. */
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentInfo"]) {
+    --agro-alert-bg: #183952;
+    --agro-alert-ink: #eff7ff;
+}
+
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]) {
+    --agro-alert-bg: #194331;
+    --agro-alert-ink: #f0fff4;
+}
+
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) {
+    --agro-alert-bg: #f9df88;
+    --agro-alert-ink: #33230b;
+}
+
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) {
+    --agro-alert-bg: #792b32;
+    --agro-alert-ink: #fff4f3;
+}
+
+[data-testid="stAlertContainer"] {
+    background-color: var(--agro-alert-bg);
+    color: var(--agro-alert-ink);
+}
+
+[data-testid="stAlertContainer"] :is(
+    [data-testid="stMarkdownContainer"], p, li, strong, em, a, code
+) {
+    color: var(--agro-alert-ink);
 }
 
 [data-testid="stMainBlockContainer"] [data-testid="stCaptionContainer"] p {
@@ -104,11 +136,10 @@
 
 [data-testid="stSidebar"] :is(
     [data-testid="stSidebarNavLink"], [data-testid="stSidebarNavLink"] span,
-    [data-testid="stSidebarNavSeparator"], [data-testid="stMarkdownContainer"] p,
-    [data-testid="stMarkdownContainer"] strong, [data-testid="stWidgetLabel"] p,
-    [data-testid="stHeading"] h2,
+    [data-testid="stSidebarNavSeparator"], [data-testid="stMarkdownContainer"],
+    [data-testid="stWidgetLabel"] p, [data-testid="stHeading"] h2,
     [data-testid="stSidebarCollapseButton"] button
-) {
+):not([data-testid="stAlertContainer"] *, [data-testid="stBaseButton-secondary"] *) {
     color: var(--agro-risk-ink);
 }
 
@@ -137,8 +168,24 @@
 [data-testid="stMainBlockContainer"] :is(
     [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-tertiary"],
     [data-testid="stExpander"] summary, [data-testid="stTabs"] [role="tab"]
-) {
+),
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] {
+    background-color: var(--agro-surface);
     color: var(--agro-ink);
+}
+
+[data-testid="stMainBlockContainer"] :is(
+    [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-tertiary"],
+    [data-testid="stExpander"] summary, [data-testid="stTabs"] [role="tab"]
+):is(:hover, [aria-selected="true"]),
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover {
+    background-color: var(--agro-soft);
+    color: var(--agro-accent);
+}
+
+[data-testid="stMainBlockContainer"] :is(button, summary) [data-testid="stMarkdownContainer"],
+[data-testid="stSidebar"] button [data-testid="stMarkdownContainer"] {
+    color: inherit;
 }
 
 [data-testid="stMainBlockContainer"] :is(
@@ -230,7 +277,7 @@
 }
 
 @media (max-width: 750px) {
-    :root:has(.agro-sidebar-risk) [data-testid="stExpandSidebarButton"] {
+    :root:has(.agro-sidebar-risk) [data-testid="stExpandSidebarButton"] button {
         background: var(--agro-risk-bg);
         color: var(--agro-risk-ink);
         border-radius: 8px;
