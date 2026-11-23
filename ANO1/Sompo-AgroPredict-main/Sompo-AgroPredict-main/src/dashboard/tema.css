@@ -264,6 +264,43 @@
     font-weight: 650;
 }
 
+/* Os campos se organizam pela largura disponível dentro do painel de telemetria. */
+:is(.st-key-agro_medicoes[data-testid="stVerticalBlock"],
+    .st-key-agro_medicoes > [data-testid="stVerticalBlock"]) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, max(7rem, calc((100% - 1.3rem) / 3))), 1fr));
+    gap: .65rem;
+    align-items: end;
+}
+
+.st-key-agro_medicoes [data-testid="stNumberInput"] [data-baseweb="input"] {
+    background-color: var(--agro-surface);
+    border-color: var(--agro-line);
+}
+
+.st-key-agro_medicoes [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+    border-color: var(--agro-accent);
+    outline: 1px solid var(--agro-accent);
+}
+
+.st-key-agro_medicoes [data-testid="stNumberInput"] [data-baseweb="input"]:has(input:disabled) {
+    background-color: var(--agro-bg);
+}
+
+.st-key-agro_medicoes [data-testid="stNumberInput"] input {
+    color: var(--agro-ink);
+    background: transparent;
+}
+
+.st-key-agro_medicoes [data-testid="stNumberInput"] input:disabled {
+    -webkit-text-fill-color: var(--agro-muted);
+    opacity: 1;
+}
+
+.st-key-agro_medicoes :is([data-testid="stNumberInputStepDown"], [data-testid="stNumberInputStepUp"]) {
+    display: none;
+}
+
 @media (max-width: 850px) {
     .st-key-agro_operacao [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .st-key-agro_telemetria) {
         flex-direction: column;

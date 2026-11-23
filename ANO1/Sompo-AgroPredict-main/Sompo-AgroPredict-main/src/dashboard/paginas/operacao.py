@@ -75,6 +75,15 @@ def label_alerta(valor, chave):
     return t("✅ OK")
 
 
+def _campo_telemetria(
+    rotulo, chave, minimo, maximo, padrao, *, automatico=None, ajuda=None, passo=None,
+):
+    if automatico is not None:
+        st.number_input(rotulo, value=automatico, disabled=True, help=ajuda)
+        return automatico
+    return st.number_input(rotulo, minimo, maximo, padrao, step=passo, key=chave, help=ajuda)
+
+
 def _entradas(ctx):
     """Coleta as 8 features + equipamento + origem de cada dado."""
     equipamentos = ctx.repo.listar_equipamentos()
@@ -82,97 +91,58 @@ def _entradas(ctx):
         int(r.id_equipamento): f"{r.codigo} · {r.tipo} {r.modelo} ({r.regiao})"
         for r in equipamentos.itertuples()
     }
-    st.markdown(t("### 🚜 Equipamento"))
-    id_equipamento = st.selectbox(
+    maquina, tipo = st.columns(2, gap="small")
+    id_equipamento = maquina.selectbox(
         t("Equipamento em operação"), list(rotulos), format_func=rotulos.get, key="op_equipamento"
     )
+    status_operacao = tipo.selectbox(t("Tipo de operação"), list(STATUS_VALIDOS), format_func=tr_status)
     equip = ctx.repo.obter_equipamento(id_equipamento)
 
     modo_real = st.toggle(
-        t("📡 Usar GPS + clima em tempo real"), value=True,
+        t("📡 Usar GPS + clima em tempo real"), value=True, key="op_modo_real",
         help=t("Desative para digitar tudo manualmente (modo demo/offline)."),
     )
-    # Uma nova captura so e solicitada pelo usuario, sem temporizador.
-    if modo_real and st.button(t("🔄 Atualizar GPS"), key="atualizar_gps"):
-        st.session_state["_ciclo_gps"] = st.session_state.get("_ciclo_gps", 0) + 1
-    ciclo = st.session_state.get("_ciclo_gps", 0)
+    status = st.container()
+    with st.container(horizontal=True, gap="small"):
+        if modo_real and st.button(t("🔄 Atualizar GPS"), key="atualizar_gps"):
+            st.session_state["_ciclo_gps"] = st.session_state.get("_ciclo_gps", 0) + 1
+        if modo_real and st.button(t("🔄 Reiniciar contador de horas"), key="op_reiniciar_horas"):
+            st.session_state["_horas_acumuladas"] = 0.0
+            st.session_state.pop("_ultimo_tick_horas", None)
 
+    ciclo = st.session_state.get("_ciclo_gps", 0)
     with st.expander(t("✍️ Substituir algum campo manualmente")):
         st.caption(t("Marque se o sensor correspondente não conectou hoje."))
-        manual_velocidade = st.checkbox(t("Velocidade"), key="manual_velocidade")
-        manual_clima = st.checkbox(t("Temperatura / Chuva"), key="manual_clima")
-        manual_umidade = st.checkbox(t("Umidade do solo"), key="manual_umidade")
-        manual_horas = st.checkbox(t("Horas de operação"), key="manual_horas")
-        manual_idade = st.checkbox(t("Idade da máquina"), key="manual_idade")
+        manual_velocidade = st.checkbox(t("Velocidade"), key="manual_velocidade", disabled=not modo_real)
+        manual_clima = st.checkbox(t("Temperatura / Chuva"), key="manual_clima", disabled=not modo_real)
+        manual_umidade = st.checkbox(t("Umidade do solo"), key="manual_umidade", disabled=not modo_real)
+        manual_horas = st.checkbox(t("Horas de operação"), key="manual_horas", disabled=not modo_real)
+        manual_idade = st.checkbox(t("Idade da máquina"), key="manual_idade", disabled=not modo_real)
 
     posicao = capturar_posicao(ciclo) if modo_real else None
     velocidade_gps, origem_velocidade = obter_velocidade_kmh(posicao) if modo_real else (None, "indisponivel")
-    clima = _clima(posicao["lat"], posicao["lon"]) if modo_real and posicao and posicao.get("lat") is not None else None
+    clima = _clima(posicao["lat"], posicao["lon"]) if posicao and posicao.get("lat") is not None else None
 
-    st.markdown(t("### 📍 Status da telemetria"))
-    if modo_real:
-        if posicao is None:
-            st.warning(t("Aguardando permissão de localização do navegador…"))
+    with status:
+        if modo_real:
+            if posicao is None:
+                st.warning(t("Aguardando permissão de localização do navegador…"))
+            else:
+                st.caption(
+                    t("GPS: {lat}, {lon} (±{acc}m) · leitura #{ciclo}",
+                      lat=f"{posicao['lat']:.5f}", lon=f"{posicao['lon']:.5f}",
+                      acc=posicao.get("accuracy_m", "?"), ciclo=ciclo)
+                )
+            if clima and clima["ok"]:
+                st.caption(t("Clima: Open-Meteo · atualizado agora"))
+            elif clima:
+                st.error(t("Falha na API de clima: {erro}", erro=clima.get("erro", "")))
+            if not manual_velocidade and velocidade_gps is None:
+                st.caption(t("⏳ Aguardando 2ª leitura de GPS para calcular velocidade…"))
         else:
-            st.caption(
-                t("GPS: {lat}, {lon} (±{acc}m) · leitura #{ciclo}",
-                  lat=f"{posicao['lat']:.5f}", lon=f"{posicao['lon']:.5f}",
-                  acc=posicao.get("accuracy_m", "?"), ciclo=ciclo)
-            )
-        if clima and clima["ok"]:
-            st.caption(t("Clima: Open-Meteo · atualizado agora"))
-        elif clima and not clima["ok"]:
-            st.error(t("Falha na API de clima: {erro}", erro=clima.get("erro", "")))
-    else:
-        st.caption(t("Modo manual — sem captura em tempo real."))
+            st.caption(t("Modo manual — sem captura em tempo real."))
 
-    st.markdown(t("### Variáveis ambientais"))
-    umidade_auto = clima["umidade_solo"] if clima and clima.get("umidade_solo") is not None else None
-    if manual_umidade or umidade_auto is None:
-        umidade_solo = st.slider(t("Umidade do solo (%)"), 0, 100, int(umidade_auto or 20))
-        fonte_umidade = "manual"
-    else:
-        umidade_solo, fonte_umidade = umidade_auto, "open-meteo"
-        st.metric(t("Umidade do solo (auto)"), f"{umidade_solo:.0f}%")
-
-    declividade = st.slider(
-        t("Declividade (%)"), 0, 25, 8,
-        help=t("Ainda depende de mapa GIS/satélite por talhão — não coberto pelo GPS do celular."),
-    )
-
-    if manual_clima or not (clima and clima["ok"]):
-        chuva_24h = st.slider(t("Chuva 24h (mm)"), 0, 40, 4)
-        temperatura = st.slider(t("Temperatura (°C)"), 15, 45, 26)
-        fonte_clima = "manual"
-    else:
-        chuva_24h, temperatura, fonte_clima = clima["chuva_24h"], clima["temperatura"], "open-meteo"
-        st.metric(t("Chuva 24h (auto)"), f"{chuva_24h:.1f} mm")
-        st.metric(t("Temperatura (auto)"), f"{temperatura:.1f}°C")
-
-    st.markdown(t("### Variáveis operacionais"))
-    if manual_velocidade or velocidade_gps is None:
-        velocidade, fonte_velocidade = st.slider(t("Velocidade (km/h)"), 0, 20, 7), "manual"
-        if modo_real and not manual_velocidade:
-            st.caption(t("⏳ Aguardando 2ª leitura de GPS para calcular velocidade…"))
-    else:
-        velocidade, fonte_velocidade = velocidade_gps, origem_velocidade
-        st.metric(t("Velocidade (auto)"), f"{velocidade:.1f} km/h", t(origem_velocidade))
-
-    idade_cadastro = max(0, date.today().year - int(equip["ano_fabricacao"]))
-    if manual_idade:
-        idade_maquina = st.slider(
-            t("Idade da máquina (anos)"), 0, 20, min(idade_cadastro, 20)
-        )
-        fonte_idade = "manual"
-    else:
-        idade_maquina, fonte_idade = idade_cadastro, "cadastro"
-        st.metric(
-            t("Idade da máquina (cadastro)"), t("{idade} anos", idade=idade_maquina),
-            t("fabricação {ano}", ano=equip["ano_fabricacao"]),
-        )
-
-    # Horas de operacao: contador automatico que soma enquanto o GPS esta
-    # conectado e PAUSA (sem "pular" tempo) quando o sinal cai.
+    # O contador soma apenas enquanto o GPS está conectado e as horas são automáticas.
     st.session_state.setdefault("_horas_acumuladas", 0.0)
     contando = modo_real and not manual_horas and posicao is not None
     if contando:
@@ -184,20 +154,55 @@ def _entradas(ctx):
     else:
         st.session_state.pop("_ultimo_tick_horas", None)
 
-    if manual_horas:
-        horas_operacao = st.slider(t("Horas de operação (acumuladas)"), 0, 14, 5)
-        fonte_horas = "manual"
-        st.caption(t("≈ {hora}", hora=formatar_hhmm(horas_operacao)))
-    else:
-        horas_operacao = round(min(st.session_state["_horas_acumuladas"], 14.0), 2)
-        fonte_horas = "gps_auto" if contando else "pausado"
-        st.metric(t("Horas de operação (auto)"), formatar_hhmm(horas_operacao), t(fonte_horas))
-        if st.button(t("🔄 Reiniciar contador de horas")):
-            st.session_state["_horas_acumuladas"] = 0.0
-            st.session_state.pop("_ultimo_tick_horas", None)
-            st.rerun()
+    umidade_clima = clima.get("umidade_solo") if clima else None
+    umidade_auto = None if manual_umidade else umidade_clima
+    clima_auto = clima if clima and clima["ok"] and not manual_clima else None
+    velocidade_auto = None if manual_velocidade else velocidade_gps
+    idade_cadastro = max(0, date.today().year - int(equip["ano_fabricacao"]))
+    idade_auto = idade_cadastro if modo_real and not manual_idade else None
+    horas_auto = (
+        round(min(st.session_state["_horas_acumuladas"], 14.0), 2)
+        if modo_real and not manual_horas else None
+    )
 
-    status_operacao = st.selectbox(t("Tipo de operação"), list(STATUS_VALIDOS), format_func=tr_status)
+    fonte_umidade = "open-meteo" if umidade_auto is not None else "manual"
+    fonte_clima = "open-meteo" if clima_auto else "manual"
+    fonte_velocidade = origem_velocidade if velocidade_auto is not None else "manual"
+    fonte_idade = "cadastro" if idade_auto is not None else "manual"
+    fonte_horas = ("gps_auto" if contando else "pausado") if horas_auto is not None else "manual"
+
+    with st.container(key="agro_medicoes"):
+        umidade_solo = _campo_telemetria(
+            t("Umidade do solo (%)"), "op_umidade", 0, 100,
+            int(umidade_clima) if umidade_clima is not None else 20,
+            automatico=umidade_auto, ajuda="Open-Meteo" if umidade_auto is not None else None,
+        )
+        declividade = st.number_input(
+            t("Declividade (%)"), 0, 25, 8, key="op_declividade",
+            help=t("Ainda depende de mapa GIS/satélite por talhão — não coberto pelo GPS do celular."),
+        )
+        chuva_24h = _campo_telemetria(
+            t("Chuva 24h (mm)"), "op_chuva", 0, 40, 4,
+            automatico=clima_auto["chuva_24h"] if clima_auto else None,
+            ajuda="Open-Meteo" if clima_auto else None,
+        )
+        temperatura = _campo_telemetria(
+            t("Temperatura (°C)"), "op_temperatura", 15, 45, 26,
+            automatico=clima_auto["temperatura"] if clima_auto else None,
+            ajuda="Open-Meteo" if clima_auto else None,
+        )
+        velocidade = _campo_telemetria(
+            t("Velocidade (km/h)"), "op_velocidade", 0, 20, 7,
+            automatico=velocidade_auto, ajuda=t(origem_velocidade) if velocidade_auto is not None else None,
+        )
+        idade_maquina = _campo_telemetria(
+            t("Idade da máquina (anos)"), f"op_idade_{id_equipamento}", 0, 20, min(idade_cadastro, 20),
+            automatico=idade_auto, ajuda=t("fabricação {ano}", ano=equip["ano_fabricacao"]),
+        )
+        horas_operacao = _campo_telemetria(
+            t("Horas de operação"), "op_horas", 0.0, 14.0, 5.0,
+            automatico=horas_auto, ajuda=t(fonte_horas) if horas_auto is not None else None, passo=0.1,
+        )
 
     dados = {
         "umidade_solo": umidade_solo, "declividade": declividade, "chuva_24h": chuva_24h,
@@ -279,7 +284,7 @@ def render() -> None:
     # ------------------------------------------------------------------
     # Persistencia: entrada -> banco -> modelo -> saida, pelo servico
     # ------------------------------------------------------------------
-    # Gravacao automatica so com GPS conectado: sem sinal, os sliders padrao
+    # Gravacao automatica so com GPS conectado: sem sinal, os campos padrao
     # nao devem virar leituras "reais" no banco a cada ciclo.
     agora_ts = time.time()
     telemetria_ativa = modo_real and posicao is not None
@@ -287,7 +292,8 @@ def render() -> None:
         telemetria_ativa and agora_ts - st.session_state.get("_ultimo_save", 0) >= INTERVALO_MIN_GRAVACAO
     )
     gravar_manual = (
-        telemetria.button(t("💾 Registrar leitura"), type="primary", width="stretch") if not telemetria_ativa else False
+        telemetria.button(t("Avaliar e registrar"), key="op_registrar", type="primary", width="stretch")
+        if not telemetria_ativa else False
     )
 
     resultado = None
@@ -323,7 +329,7 @@ def render() -> None:
                 leitura=ultimo[0], predicao=ultimo[1],
             ))
         elif not telemetria_ativa:
-            st.info(t("Prévia — ainda não gravada. Use **💾 Registrar leitura** no painel de telemetria."))
+            st.info(t("Prévia — ainda não gravada. Use **Avaliar e registrar** no painel de telemetria."))
 
     classe = avaliacao.classe_risco
     st.session_state["_agro_risco_operacao"] = (classe, str(equip["codigo"]))
